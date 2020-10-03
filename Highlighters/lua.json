@@ -1,0 +1,32 @@
+﻿{
+	"Syntax": [
+		"for",
+		"in",
+		"do",
+		"function",
+		"local",
+		"if",
+		"and",
+		"or",
+		"then",
+		"else",
+		"elseif",
+		"end",
+		"return"
+	],
+	"String": [
+		"\"", 
+		"'"
+	],
+	"Function": [
+		"print",
+		"require"
+	],
+	"Comment": [
+		"--",
+	],
+	"Bool": [
+		"true", 
+		"false"
+	]
+}

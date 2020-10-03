@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "iMksV2GATISxqKYLsJK2m2jYGGV9AzogMgs4yJetqQd+uA+hbmMct+EIEf1uUOQlrO2QFghdTw0YdGwWP+dSlQ==",
+  "success": true,
+  "projectFilePath": "K:\\Projets\\C#\\code-editor\\code-editor.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Utilisateur\\.nuget\\packages\\love2dcs\\11.0.50\\love2dcs.11.0.50.nupkg.sha512",
+    "C:\\Users\\Utilisateur\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

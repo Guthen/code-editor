@@ -1,0 +1,32 @@
+﻿{
+	"Syntax": [
+		"if",
+		"else",
+		"elif",
+		"and",
+		"or",
+		"class",
+		"def",
+		"global",
+		"import",
+		"from",
+		"for",
+		"in",
+		"return"
+	],
+	"String": [
+		"\"", 
+		"'"
+	],
+	"Function": [
+		"print"
+	],
+	"Comment": [
+		"#",
+		"\"\"\""
+	],
+	"Bool": [
+		"True", 
+		"False"
+	]
+}

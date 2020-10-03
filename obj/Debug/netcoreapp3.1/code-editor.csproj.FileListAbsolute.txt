@@ -1,0 +1,16 @@
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\code-editor.exe
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.csprojAssemblyReference.cache
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.AssemblyInfoInputs.cache
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.AssemblyInfo.cs
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\code-editor.deps.json
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\code-editor.runtimeconfig.json
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\code-editor.runtimeconfig.dev.json
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\code-editor.dll
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\code-editor.pdb
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\LoveSharp.dll
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.csproj.CopyComplete
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.dll
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.pdb
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.genruntimeconfig.cache
+K:\Projets\C#\code-editor\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+K:\Projets\C#\code-editor\obj\Debug\netcoreapp3.1\code-editor.csproj.CoreCompileInputs.cache

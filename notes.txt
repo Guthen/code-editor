@@ -1,0 +1,13 @@
+Entrer:
+  Créer une nouvelle ligne avec le texte situé après le curseur dans la ligne actuelle
+  Met le curseur au début de la nouvelle ligne
+Backspace:
+  si x = 0, 
+    si y > 0 
+	Supprime la ligne 
+	met curseur à la fin de la ligne précédente
+	met le texte situé après le curseur dans l'ancienne ligne à la nouvelle position
+  sinon
+	supprime les caractères précédants
+
+Suppr:
