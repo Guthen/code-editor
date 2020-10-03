@@ -56,6 +56,14 @@ namespace CodeEditor.UI
             Title = Path.GetFileName( path );
             FilePath = path;
 
+            //  > Reset Cursor
+            Cursor.X = 0;
+            Cursor.Y = 0;
+
+            //  > Reset Camera
+            Camera.X = 0;
+            Camera.Y = 0;
+
             //  > Get Highlighter
             var highlighter = HighlighterParser.Get( Path.GetExtension( path ).Replace( ".", "" ) );
             if ( !( highlighter == null ) )

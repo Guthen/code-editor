@@ -29,30 +29,30 @@ namespace CodeEditor
 
             var te_2 = new TextEditor();
             te_2.SetFont( TextFont, TitleFont );
-            te_2.SetFile( @"K:\Projets\Lua\Löve2D\DungeonDemons\main.lua" );
+            te_2.SetFile( @"D:\Projets\Lua\Car2Game\main.lua" );
             te_2.SetSize( 500, Graphics.GetHeight() );
             te_2.HighlighterTheme = highlighter;
 
             var te_1 = new TextEditor();
             te_1.SetFont( TextFont, TitleFont );
-            te_1.SetFile( @"K:\Programmes\Steam\steamapps\common\GarrysMod\garrysmod\addons\GNLib\addon.json" );
+            te_1.SetFile( @"C:\Program Files (x86)\Steam\steamapps\common\GarrysMod\garrysmod\addons\GNLib\certified_addons.json" );
             te_1.SetPos( te_2.Bounds.Width );
             te_1.SetSize( Graphics.GetWidth() - te_2.Bounds.Width, 400 );
             te_1.HighlighterTheme = highlighter;
 
-            //var console = new DeveloperConsole();
-            //console.SetFont( TextFont, TitleFont );
-            //console.SetPos( te_1.Bounds.X, te_1.Bounds.Y + te_1.Bounds.Height );
-            //console.SetSize( te_1.Bounds.Width, Graphics.GetHeight() - te_1.Bounds.Height );
+            var console = new DeveloperConsole();
+            console.SetFont( TextFont, TitleFont );
+            console.SetPos( te_1.Bounds.X, te_1.Bounds.Y + te_1.Bounds.Height );
+            console.SetSize( te_1.Bounds.Width, Graphics.GetHeight() - te_1.Bounds.Height );
 
-            var te_3 = new TextEditor();
-            te_3.SetFont( TextFont, TitleFont );
-            te_3.SetFile( @"K:\Projets\Python\py-icewalker\main_1.py" );
-            te_3.SetPos( te_1.Bounds.X, te_1.Bounds.Y + te_1.Bounds.Height );
-            te_3.SetSize( te_1.Bounds.Width, Graphics.GetHeight() - te_1.Bounds.Height );
-            te_3.HighlighterTheme = highlighter;
+            //var te_3 = new TextEditor();
+            //te_3.SetFont( TextFont, TitleFont );
+            //te_3.SetFile( @"K:\Projets\Python\py-icewalker\main_1.py" );
+            //te_3.SetPos( te_1.Bounds.X, te_1.Bounds.Y + te_1.Bounds.Height );
+            //te_3.SetSize( te_1.Bounds.Width, Graphics.GetHeight() - te_1.Bounds.Height );
+            //te_3.HighlighterTheme = highlighter;
 
-            Elements.Focus( te_2 );
+            Elements.Focus( console );
         }
 
         public override void Update( float dt ) => Elements.Call( "Update", dt );

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "K:\\Projets\\C#\\code-editor\\code-editor.csproj": {}
+    "D:\\Projets\\C#\\code-editor\\code-editor.csproj": {}
   },
   "projects": {
-    "K:\\Projets\\C#\\code-editor\\code-editor.csproj": {
+    "D:\\Projets\\C#\\code-editor\\code-editor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "K:\\Projets\\C#\\code-editor\\code-editor.csproj",
+        "projectUniqueName": "D:\\Projets\\C#\\code-editor\\code-editor.csproj",
         "projectName": "code-editor",
-        "projectPath": "K:\\Projets\\C#\\code-editor\\code-editor.csproj",
-        "packagesPath": "C:\\Users\\Utilisateur\\.nuget\\packages\\",
-        "outputPath": "K:\\Projets\\C#\\code-editor\\obj\\",
+        "projectPath": "D:\\Projets\\C#\\code-editor\\code-editor.csproj",
+        "packagesPath": "C:\\Users\\Arthur\\.nuget\\packages\\",
+        "outputPath": "D:\\Projets\\C#\\code-editor\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Utilisateur\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Arthur\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [

@@ -38,7 +38,7 @@ namespace CodeEditor.UI
             if ( Focused == null )
                 return;
 
-            Type type = elements[0].GetType();
+            Type type = Focused.GetType();
             MethodInfo method = type.GetMethod( name );
             method.Invoke( Focused, args );
         }

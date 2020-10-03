@@ -11,6 +11,7 @@ namespace CodeEditor
             {
                 WindowCentered = true,
                 WindowDisplay = 0,
+                WindowResizable = true,
             } );
         }
     }
