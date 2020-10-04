@@ -13,14 +13,14 @@
 		"while",
 		"for",
 		"in",
-		"return"
+		"return",
+                "raise",
+                "{", "}", "[", "]", ",",
+		"=", "+", "-", "*", "/"
 	],
 	"String": [
 		"\"", 
 		"'"
-	],
-	"Function": [
-		"print"
 	],
 	"Comment": [
 		"#",
@@ -28,6 +28,7 @@
 	],
 	"Bool": [
 		"True", 
-		"False"
+		"False",
+                "None"
 	]
 }
