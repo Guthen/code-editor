@@ -14,8 +14,8 @@ namespace CodeEditor
         {
             Keyboard.SetKeyRepeat( true );
 
-            Font TextFont = Graphics.NewFont( "Assets/consola.ttf", 15 );
-            Font TitleFont = Graphics.NewFont( "Assets/consolab.ttf", 16 );
+            Font TextFont = Graphics.NewFont( "Assets/Fonts/consola.ttf", 15 );
+            Font TitleFont = Graphics.NewFont( "Assets/Fonts/consolab.ttf", 16 );
 
             //  > Coolors: https://coolors.co/090c08-fff7f8-696d7d-ffe74c-ff5964-6369d1-6cae75-8b9474
             HighlighterTheme highlighter = new HighlighterTheme()
@@ -25,7 +25,7 @@ namespace CodeEditor
                 Comment = new Color( 108, 174, 117, 255 ),
                 Syntax = new Color( 255, 89, 100, 255 ),
             };
-            HighlighterParser.Load( "Highlighters" );
+            HighlighterParser.Load( "Assets/Highlighters" );
 
             var te_2 = new TextEditor();
             te_2.SetFont( TextFont, TitleFont );
