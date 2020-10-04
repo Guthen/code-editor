@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Media.Media3D;
 using Love;
 using File = System.IO.File;
 
@@ -21,6 +24,8 @@ namespace CodeEditor.UI
                 ( DeveloperConsole self, List<string> args ) =>
                 {
                     self.Lines.Clear();
+                    self.Camera.X = 0;
+                    self.Camera.Y = 0;
                     return "";
                 } 
             },
@@ -39,7 +44,20 @@ namespace CodeEditor.UI
                         return "ERROR: theme doesn't exists";
 
                     Main.SetTheme( Theme.Get( args[0] ) );
+                    Program.Preferences.Theme = args[0];
+                    Program.Preferences.Save();
                     return string.Format( "Theme: set to '{0}'", args[0] );
+                }
+            },
+            {
+                "cd",
+                ( DeveloperConsole self, List<string> args ) =>
+                {
+                    if ( args.Count < 1 || !Directory.Exists( args[0] ) )
+                        return "ERROR: path doesn't exists";
+
+                    self.CurrentDirectory = args[0];
+                    return string.Format( "Console: move to '{0}'", args[0] );
                 }
             },
             {
@@ -53,22 +71,19 @@ namespace CodeEditor.UI
                     if ( !int.TryParse( args[0], out int id ) )
                         return "ERROR: failed to parse 'id'";
 
-                    if ( id >= Elements.elements.Count || id < 0 )
+                    var text_editors = Elements.elements.Where( ( Element el ) => el is TextEditor ).ToList();
+                    if ( id >= text_editors.Count || id < 0 )
                         return "ERROR: failed to get element";
 
                     //  > Get Element
-                    var element = Elements.elements[id];
-                    if ( !( element is TextEditor ) )
-                        return "ERROR: element is not a TextEditor";
-
-                    var text_editor = (TextEditor) element;
+                    var text_editor = (TextEditor) text_editors[id];
 
                     //  > Get Path
                     var path = "";
-                    if ( Regex.Match( args[1], @"^\w:\/" ).Success )
+                    if ( Regex.Match( args[1], @"^\w:(\/|\\)" ).Success )
                         path = args[1];
                     else
-                        path = Path.GetFullPath( "../" + args[1], text_editor.FilePath );
+                        path = Path.Combine( self.CurrentDirectory, args[1] );
 
                     //  > Set File
                     if ( !File.Exists( path ) )
@@ -81,6 +96,7 @@ namespace CodeEditor.UI
         };
 
         public string PromptCommand = "";
+        public string CurrentDirectory = "";
 
         public DeveloperConsole()
         {
@@ -91,7 +107,17 @@ namespace CodeEditor.UI
             } );
         }
 
-        public void Append( string text ) => Lines.Add( text );
+        public void OutputHandler( object process, DataReceivedEventArgs outline ) => Append( outline.Data );
+        public void Append( string text )
+        {
+            if ( text == null ) return;
+            Lines.Add( text );
+
+            var line_total_height = Lines.Count * LineHeight;
+            var view = Bounds.Height + Camera.Y - TitleHeight * 3;
+            if ( line_total_height > view )
+                Camera.Y = line_total_height - TitleHeight * 2;
+        }
 
         public void Prompt( string prompt )
         {
@@ -141,6 +167,18 @@ namespace CodeEditor.UI
 
         public override void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat )
         {
+            if ( Keyboard.IsDown( KeyConstant.LCtrl ) )
+            {
+                if ( Keyboard.IsDown( KeyConstant.V ) )
+                {
+                    string text = Clipboard.GetText();
+                    PromptCommand = PromptCommand.Insert( CursorX, text );
+                    CursorX = GetClampedCursorX( CursorX + text.Length );
+                }
+
+                return;
+            }
+
             switch ( key )
             {
                 case KeyConstant.Backspace:
@@ -185,7 +223,7 @@ namespace CodeEditor.UI
             for ( int i = 0; i < Lines.Count; i++ )
             {
                 Graphics.SetColor( GetLineColor( Lines[i] ) );
-                Graphics.Print( Lines[i], Padding.X - Camera.X, i * LineHeight - Camera.Y );
+                Graphics.Print( Lines[i], (int) ( Padding.X - Camera.X ), (int) ( i * LineHeight - Camera.Y ) );
             }
 
             //  > Prompt
@@ -197,7 +235,7 @@ namespace CodeEditor.UI
             Graphics.Line( 0, y, Padding.X + Bounds.Width - Padding.X * 2, y );
 
             Graphics.SetColor( TextColor );
-            Graphics.Print( "> " + PromptCommand, 0, y + Padding.Y );
+            Graphics.Print( "> " + PromptCommand, (int) -Camera.X, y + Padding.Y );
 
             //  > Cursor
             if ( !IsFocus ) return;

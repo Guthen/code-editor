@@ -5,6 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using File = System.IO.File;
+using System.Windows;
+using Point = Love.Point;
+using Dapplo.Log;
+using System.Diagnostics;
 
 namespace CodeEditor.UI
 {
@@ -17,7 +21,7 @@ namespace CodeEditor.UI
 
         public HighlighterParser HighlighterParser;
 
-        public List<string> Lines = new List<string>();
+        public List<string> Lines = new List<string>() { "" };
         public string Text {
             get {
                 return string.Join( "\r\n", Lines );
@@ -25,16 +29,10 @@ namespace CodeEditor.UI
             set {
                 Lines.Clear();
 
-                int max_width = 0;
                 foreach ( string line in value.Split( "\r\n" ) )
-                {
-                    max_width = Math.Max( max_width, TextFont.GetWidth( line ) );
                     Lines.Add( line );
-                }
-                TextWidth = max_width;
             }
         }
-        public int TextWidth;
 
         public string FilePath = "";
 
@@ -46,15 +44,26 @@ namespace CodeEditor.UI
                 return string.Format( "L={0} C={1}", Cursor.Y + 1, Cursor.X + 1 );
             } );
 
-            ComputeFontHeight();
+            ///  > Adding Buttons
+            //  > Save
+            Children.Add( new WindowButton( 1, this, ( WindowButton self ) => ( (TextEditor) self.Parent ).Save() ) );
+            //  > Load
+            Children.Add( new WindowButton( 2, this, ( WindowButton self ) => ( (TextEditor) self.Parent ).Load() ) );
         }
 
         public void SetFile( string path )
         {
-            Text = File.ReadAllText( path );
-            Title = Path.GetFileName( path );
-            FilePath = path;
-            Main.Log( string.Format( "Load '{0}'", path ) );
+            try
+            {
+                Text = File.ReadAllText( path );
+                Title = Path.GetFileName( path );
+                FilePath = path;
+                Main.Log( string.Format( "File: load '{0}'", path ) );
+            }
+            catch ( IOException )
+            {
+                Main.Log( string.Format( "ERROR: failed loading '{0}'", path ) );
+            }
 
             //  > Reset Cursor
             Cursor.X = 0;
@@ -65,15 +74,54 @@ namespace CodeEditor.UI
             Camera.Y = 0;
 
             //  > Get Highlighter
-            var highlighter = HighlighterParser.Get( Path.GetExtension( path ).Replace( ".", "" ) );
+            var extension = Path.GetExtension( FilePath ).Replace( ".", "" );
+            var highlighter = HighlighterParser.Get( extension );
             if ( !( highlighter == null ) )
+            {
                 HighlighterParser = highlighter;
+                if ( extension == "py" )
+                {
+                    Children.Add( new WindowButton( 4, this, ( WindowButton self ) => Run() ) );
+                    ComputeLayout();
+                }
+            }
         }
 
         public void Save()
         {
             File.WriteAllLines( FilePath, Lines );
             Main.Log( string.Format( "Saved '{0}'", FilePath ) );
+        }
+
+        public void Load()
+        {
+            Main.Log( "ERROR: not implemented" );   
+        }
+
+        public void Run()
+        {
+            //Main.Log( string.Format( "Run '{0}'", FilePath ) );
+            if ( !FilePath.EndsWith( "py" ) ) return;
+            Main.Log( string.Format( "> '{0}' '{1}'", Program.Preferences.Interpreters.Python, FilePath ) );
+
+            var process = new Process()
+            {
+                StartInfo =
+                {
+                    FileName = Program.Preferences.Interpreters.Python,
+                    Arguments = FilePath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                }
+            };
+
+            process.OutputDataReceived += Main.DevConsole.OutputHandler;
+            process.ErrorDataReceived += Main.DevConsole.OutputHandler;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
         }
 
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( Lines[Cursor.Y].Length, 0 ) );
@@ -83,6 +131,13 @@ namespace CodeEditor.UI
         {
             Cursor.Y = GetClampedCursorY( y );
             Cursor.X = GetClampedCursorX( x );
+
+            var cursor_y = (int) ( Cursor.Y * LineHeight - Camera.Y ) + TitleHeight * 2;
+            if ( !Intersect( (int) ( Cursor.X - Camera.X ), cursor_y ) )
+            {
+                Console.WriteLine( "hey" );
+                SetCameraY( Camera.Y + ( cursor_y > Bounds.Y + Bounds.Height ? LineHeight : -LineHeight ) );
+            }
         }
 
         public void MoveCursorTowards( int x, int y )
@@ -172,26 +227,67 @@ namespace CodeEditor.UI
             return TextFont.GetWidth( cursor_char );
         }
 
+        public void Append( string text )
+        {
+            if ( text.Contains( "\n" ) )
+            {
+                string start_line_text = Lines[Cursor.Y].Remove( 0, Cursor.X );
+                Lines[Cursor.Y] = Lines[Cursor.Y].Substring( 0, Cursor.X );
+
+                foreach ( string line in text.Split( "\n" ) )
+                {
+                    Append( line );
+                    Lines.Insert( Cursor.Y + 1, "" );
+                    SetCursorPos( 0, Cursor.Y + 1 );
+                }
+
+                Append( start_line_text );
+            }
+            else
+                Lines[Cursor.Y] = Lines[Cursor.Y].Insert( Cursor.X, text );
+        }
+
+        ///  > Camera
+        public void SetCameraX( float cam_x )
+        {
+            Camera.X = Math.Clamp( cam_x, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f - CounterWidth );
+        }
+        public void SetCameraY( float cam_y )
+        {
+            Camera.Y = Math.Clamp( cam_y, 0, LineHeight * Lines.Count * .95f );
+        }
+
         public override void WheelMoved( int x, int y )
         {
             var speed = -y * 50;
 
             //  > Scroll X
             if ( Keyboard.IsDown( KeyConstant.LShift ) )
-                Camera.X = Math.Clamp( Camera.X + speed, 0, TextWidth );
+                SetCameraX( Camera.X + speed );
+            //Camera.X = Math.Clamp( Camera.X + speed, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f - CounterWidth );
             //  > Scroll Y
             else
-                Camera.Y = Math.Clamp( Camera.Y + speed, 0, Lines.Count * LineHeight - TitleHeight );
+                Camera.Y = Math.Clamp( Camera.Y + speed, 0, LineHeight * Lines.Count * .95f );
         }
 
         public override void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat )
         {
             //Console.WriteLine( key );
 
-            //  > Save
-            if ( Keyboard.IsDown( KeyConstant.LCtrl ) && Keyboard.IsDown( KeyConstant.S ) )
+            //  > Control keys
+            if ( Keyboard.IsDown( KeyConstant.LCtrl ) )
             {
-                Save();
+                //  > Save
+                if ( Keyboard.IsDown( KeyConstant.S ) )
+                    Save();
+                else if ( Keyboard.IsDown( KeyConstant.V ) )
+                {
+                    string text = Clipboard.GetText();
+                    Append( text );
+
+                    if ( !text.Contains( "\n" ) )
+                        MoveCursorTowards( text.Length, 0 );
+                }
             }
             //  > Single keys
             else
@@ -220,6 +316,9 @@ namespace CodeEditor.UI
 
                         //  > Set cursor pos to new line
                         SetCursorPos( 0, Cursor.Y + 1 );
+                        break;
+                    case KeyConstant.KeypadEnter:
+                        KeyPressed( KeyConstant.Enter, scancode, is_repeat );
                         break;
                     case KeyConstant.Tab:
                         var n = 4;
@@ -263,31 +362,27 @@ namespace CodeEditor.UI
                         }
 
                         break;
+                    case KeyConstant.F5:
+                        Save();
+                        Run();
+                        break;
                 }
         }
 
         public override void TextInput( string text )
         {
-            Lines[Cursor.Y] = Lines[Cursor.Y].Insert( Cursor.X, text );
+            Append( text );
             Cursor.X++;
             //Console.WriteLine( "insert '{0}'", text );
         }
 
         public override void InnerRender()
         {
-            //  > Counter Border
-            Graphics.SetColor( DiscretColor );
-            Graphics.Line( CounterWidth - Camera.X, Padding.Y - Camera.Y, CounterWidth - Camera.X, Padding.Y + LineHeight * Lines.Count - Padding.Z - Camera.Y );
-
             //  > Text
             Graphics.Translate( 0, TitleHeight / 4 );
             Graphics.SetFont( TextFont );
             for ( int i = 0; i < Lines.Count; i++ )
             {
-                //  > Counter
-                Graphics.SetColor( DiscretColor );
-                Graphics.Printf( ( i + 1 ).ToString(), -Camera.X, LineHeight * i - Camera.Y, CounterWidth, AlignMode.Center );
-
                 //  > Line
                 int off_x = 0;
                 MatchCollection matches = Regex.Matches( Lines[i], @"\w+|--|\W" );
@@ -297,15 +392,34 @@ namespace CodeEditor.UI
                     string word = match.Value;
 
                     Graphics.SetColor( GetWordColor( word, u == 0/*, u + 1 < matches.Count ? matches[u + 1].Value : ""*/ ) );
-                    Graphics.Print( word, CounterWidth + CounterBorderSpace - Camera.X + off_x, LineHeight * i - Camera.Y );
+                    Graphics.Print( word, (int) ( CounterWidth + CounterBorderSpace - Camera.X + off_x ), (int) ( LineHeight * i - Camera.Y ) );
                     off_x += TextFont.GetWidth( word );
                 }
             }
 
-            //  > Cursor
-            if ( !IsFocus ) return;
-            Graphics.SetColor( TextColor.r, TextColor.g, TextColor.b, .5f );
-            Graphics.Rectangle( Timer.GetTime() % 1 <= .5 ? DrawMode.Fill : DrawMode.Line, CounterWidth + CounterBorderSpace - Camera.X + GetCursorX(), -Camera.Y + Cursor.Y * LineHeight, GetCursorCharWide(), LineHeight );
+            ///  > Cursor
+            if ( IsFocus )
+            {
+                Graphics.SetColor( TextColor.r, TextColor.g, TextColor.b, .5f );
+                Graphics.Rectangle( Timer.GetTime() % 1 <= .5 ? DrawMode.Fill : DrawMode.Line, CounterWidth + CounterBorderSpace - Camera.X + GetCursorX(), -Camera.Y + Cursor.Y * LineHeight, GetCursorCharWide(), LineHeight );
+            }
+
+            ///  > Counter
+            //  > Background
+            Graphics.SetColor( BackgroundColor );
+            Graphics.Rectangle( DrawMode.Fill, 0, -TitleHeight, CounterWidth, Bounds.Height );
+
+            //  > Border
+            Graphics.SetColor( DiscretColor );
+            Graphics.Line( CounterWidth, -Camera.Y, CounterWidth, LineHeight * Lines.Count - Padding.Z - Camera.Y );
+
+            //  > Lines
+            for ( int i = 0; i < Lines.Count; i++ )
+            {
+                //  > Counter
+                Graphics.SetColor( DiscretColor );
+                Graphics.Printf( ( i + 1 ).ToString(), 0, (int) ( LineHeight * i - Camera.Y ), CounterWidth, AlignMode.Center );
+            }
         }
     }
 }

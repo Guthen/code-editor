@@ -3,6 +3,7 @@
 		"if",
 		"else",
 		"elif",
+		"not",
 		"and",
 		"or",
 		"class",

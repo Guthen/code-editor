@@ -7,6 +7,14 @@ using Newtonsoft.Json;
 
 namespace CodeEditor
 {
+    struct HighlighterTheme
+    {
+        public Color Number;
+        public Color String;
+        public Color Syntax;
+        public Color Comment;
+    }
+
     struct WindowTheme
     {
         public Color TextColor;

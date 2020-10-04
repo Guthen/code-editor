@@ -7,14 +7,6 @@ using Newtonsoft.Json;
 
 namespace CodeEditor
 {
-    struct HighlighterTheme
-    {
-        public Color Number;
-        public Color String;
-        public Color Syntax;
-        public Color Comment;
-    }
-
     class HighlighterParser
     {
         public string[] Syntax;

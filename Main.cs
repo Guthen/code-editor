@@ -41,6 +41,8 @@ namespace CodeEditor
             Window.TitleBackgroundColor = theme.Window.TitleBackgroundColor;
             Window.DiscretColor = theme.Window.DiscretColor;
 
+            Graphics.SetBackgroundColor( Window.BackgroundColor );
+
             CurrentTheme = theme;
         }
 
@@ -66,8 +68,8 @@ namespace CodeEditor
             //  > Elements
             var te_2 = new TextEditor();
             te_2.SetFont( TextFont, TitleFont );
-            te_2.SetFile( @"D:\Projets\Lua\Car2Game\main.lua" );
-            te_2.SetSize( 500, Graphics.GetHeight() );
+            te_2.SetFile( @"K:\Projets\Python\test.py" );
+            te_2.SetSize( (int) ( Graphics.GetWidth() * .65f ), Graphics.GetHeight() );
             //te_2.HighlighterTheme = highlighter;
 
             var te_1 = new TextEditor();
@@ -92,7 +94,7 @@ namespace CodeEditor
 
             //  > Themes
             Theme.Load( "Assets/Themes" );
-            SetTheme( Theme.Get( "fieldlights" ) );
+            SetTheme( Theme.Get( Program.Preferences.Theme ) );
         }
 
         public override void Update( float dt ) => Elements.Call( "Update", dt );

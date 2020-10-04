@@ -12,11 +12,13 @@ namespace CodeEditor.UI
 
         public Action<WindowButton> Action = ( WindowButton self ) => { Main.Log( "Clicked" ); };
 
-        public WindowButton( Action<WindowButton> action )
+        public WindowButton( int icon_id, Element parent, Action<WindowButton> action )
         {
             SetSize( 16, 16 );
+            SetIconID( icon_id );
 
             Action = action;
+            Parent = parent;
         }
 
         public void SetIconID( int id )
@@ -34,7 +36,7 @@ namespace CodeEditor.UI
             var y = bounds.Y;
 
             //  > Draw
-            Graphics.SetColor( Color.White );
+            Graphics.SetColor( Intersect( (int) Mouse.GetX(), (int) Mouse.GetY() ) ? new Color( Window.TextColor.r, Window.TextColor.g, Window.TextColor.b, 175 ) : Window.TextColor );
             if ( !( Image == null ) )
             {
                 if ( !( Quad == null ) )
@@ -78,14 +80,7 @@ namespace CodeEditor.UI
 
             ComputeFontHeight();
 
-            var button = new WindowButton( ( WindowButton self ) =>
-            {
-                self.Parent.Destroy();
-            } ) { 
-                Parent = this 
-            };
-            button.SetIconID( 0 );
-            Children.Add( button );
+            Children.Add( new WindowButton( 0, this, ( WindowButton self ) => self.Parent.Destroy() ) );
 
             ComputeLayout();
         }
@@ -162,7 +157,7 @@ namespace CodeEditor.UI
             Graphics.Print( Title, inner_x + Padding.X, inner_y + Padding.Y * .5f );
 
             var limit = 150;
-            Graphics.Printf( RightTitle(), inner_x + Padding.X + Bounds.Width - Padding.Z * 2 - Padding.X * 2 - Children.Count * 16 - limit, inner_y + Padding.Y * .5f, limit, AlignMode.Right );
+            Graphics.Printf( RightTitle(), inner_x + Padding.X + Bounds.Width - Padding.Z * 2 - Padding.X * 4 - Children.Count * 16 - limit, inner_y + Padding.Y * .5f, limit, AlignMode.Right );
         }
     }
 }
