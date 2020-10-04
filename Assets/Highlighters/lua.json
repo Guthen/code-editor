@@ -21,10 +21,6 @@
 		"\"", 
 		"'"
 	],
-	"Function": [
-		"print",
-		"require"
-	],
 	"Comment": [
 		"--",
 	],
