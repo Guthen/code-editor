@@ -1,10 +1,8 @@
 ﻿{
 	"Syntax": [],
 	"String": [
-		"\"", 
-		"'"
+		"\""
 	],
-	"Function": [],
 	"Comment": [],
 	"Bool": [
 		"true", 
