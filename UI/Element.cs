@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace CodeEditor.UI
@@ -55,6 +56,9 @@ namespace CodeEditor.UI
 
     class Element
     {
+        public Element Parent;
+        public List<Element> Children = new List<Element>();
+
         public Rectangle Bounds { get; set; } = new Rectangle( 0, 0, 450, 300 );
         public bool IsFocus = false;
         public int ID = 0;
@@ -63,6 +67,14 @@ namespace CodeEditor.UI
         {
             Elements.elements.Add( this );
             ID = Elements.elements.Count;
+        }
+
+        public void Destroy()
+        {
+            foreach ( Element child in Children )
+                child.Destroy();
+
+            Elements.elements.Remove( this );
         }
 
         public void SetPos( int? x = null, int? y = null )
@@ -77,6 +89,8 @@ namespace CodeEditor.UI
             Bounds = bounds;
         }
 
+        public virtual void ComputeLayout() { }
+
         public void SetSize( int? w = null, int? h = null )
         {
             Rectangle bounds = Bounds;
@@ -87,12 +101,28 @@ namespace CodeEditor.UI
                 bounds.Height = (int) h;
 
             Bounds = bounds;
+            ComputeLayout();
+        }
+
+        public Rectangle GetAbsoluteBounds()
+        {
+            Rectangle bounds = Bounds;
+
+            //  > Add Parent Bounds
+            if ( !( Parent == null ) )
+            {
+                bounds.X += Parent.Bounds.X;
+                bounds.Y += Parent.Bounds.Y;
+            }
+
+            return bounds;
         }
 
         public bool Intersect( int x, int y, int w = 1, int h = 1 )
         {
-            return Bounds.X < x + w && Bounds.Y < y + h
-                && x < Bounds.X + Bounds.Width && y < Bounds.Y + Bounds.Height;
+            Rectangle bounds = GetAbsoluteBounds();
+            return bounds.X < x + w && bounds.Y < y + h
+                && x < bounds.X + bounds.Width && y < bounds.Y + bounds.Height;
         }
 
         public virtual void Update( float dt ) {}
@@ -101,5 +131,6 @@ namespace CodeEditor.UI
         public virtual void WheelMoved( int x, int y ) { }
         public virtual void TextInput( string text ) { }
         public virtual void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat ) { }
+        public virtual void MousePressed( float x, float y, int button, bool is_touch ) { }
     }
 }

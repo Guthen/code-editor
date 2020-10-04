@@ -112,6 +112,16 @@ namespace CodeEditor.UI
                 Append( "ERROR: Command doesn't exists" );
         }
 
+        public Color GetLineColor( string line )
+        {
+            if ( line.StartsWith( '>' ) )
+                return Main.CurrentTheme.Window.DiscretColor;
+            if ( line.StartsWith( "ERROR" ) )
+                return Main.CurrentTheme.Highlighter.Syntax;
+
+            return TextColor;
+        }
+
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( PromptCommand.Length, 0 ) );
         public int GetCursorX() => TextFont.GetWidth( "> " + PromptCommand.Substring( 0, CursorX ) );
         public int GetCursorCharWide()
@@ -172,9 +182,9 @@ namespace CodeEditor.UI
         {
             //  > Lines
             Graphics.SetFont( TextFont );
-            Graphics.SetColor( TextColor );
             for ( int i = 0; i < Lines.Count; i++ )
             {
+                Graphics.SetColor( GetLineColor( Lines[i] ) );
                 Graphics.Print( Lines[i], Padding.X - Camera.X, i * LineHeight - Camera.Y );
             }
 

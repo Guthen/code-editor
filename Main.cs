@@ -26,13 +26,13 @@ namespace CodeEditor
         public static void SetTheme( Theme theme )
         {
             //  > Set TextEditor's Highlighter
-            foreach ( Element element in Elements.elements )
-            {
-                if ( !( element is TextEditor ) ) continue;
+            //foreach ( Element element in Elements.elements )
+            //{
+            //    if ( !( element is TextEditor ) ) continue;
 
-                var text_editor = (TextEditor) element;
-                text_editor.HighlighterTheme = theme.Highlighter;
-            }
+            //    var text_editor = (TextEditor) element;
+            //    text_editor.HighlighterTheme = theme.Highlighter;
+            //}
 
             //  > Window's colors
             Window.TextColor = theme.Window.TextColor;
@@ -107,10 +107,21 @@ namespace CodeEditor
         public override void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat ) => Elements.CallFocus( "KeyPressed", key, scancode, is_repeat );
         public override void TextInput( string text ) => Elements.CallFocus( "TextInput", text );
 
-        public override void MousePressed( float x, float y, int button, bool isTouch )
+        public override void MousePressed( float x, float y, int button, bool is_touch )
         {
+            //  > Call
+            for ( int i = 0; i < Elements.elements.Count; i++ )
+            {
+                Element el = Elements.elements[i];
+                if ( el.Intersect( (int) x, (int) y ) )
+                    el.MousePressed( x, y, button, is_touch );
+            }
+
+            //  > Focus
             var element = Elements.GetElementAt( (int) x, (int) y );
-            if ( !( element == null ) )
+            if ( element == null ) return;
+
+            if ( element is Window )
                 Elements.Focus( element );
         }
 

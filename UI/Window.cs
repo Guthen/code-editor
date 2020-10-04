@@ -5,6 +5,51 @@ using System.Text;
 
 namespace CodeEditor.UI
 {
+    class WindowButton : Element
+    {
+        public Image Image = Graphics.NewImage( "Assets/Images/icons.png" );
+        public Quad Quad;
+
+        public Action<WindowButton> Action = ( WindowButton self ) => { Main.Log( "Clicked" ); };
+
+        public WindowButton( Action<WindowButton> action )
+        {
+            SetSize( 16, 16 );
+
+            Action = action;
+        }
+
+        public void SetIconID( int id )
+        {
+            Quad = Graphics.NewQuad( id * Image.GetHeight(), 0, Image.GetHeight(), Image.GetHeight(), Image.GetWidth(), Image.GetHeight() );
+        }
+
+        public override void MousePressed( float x, float y, int button, bool is_touch ) => Action( this );
+
+        public override void Render()
+        {
+            //  > Get Position
+            var bounds = GetAbsoluteBounds();
+            var x = bounds.X;
+            var y = bounds.Y;
+
+            //  > Draw
+            Graphics.SetColor( Color.White );
+            if ( !( Image == null ) )
+            {
+                if ( !( Quad == null ) )
+                {
+                    var viewport = Quad.GetViewport();
+                    Graphics.Draw( Quad, Image, x, y, 0, viewport.Width / bounds.Width, viewport.Height / bounds.Height );
+                }
+                else
+                    Graphics.Draw( Image, x, y, 0, Image.GetWidth() / bounds.Width, Image.GetHeight() / bounds.Height );
+            }
+            else
+                Graphics.Rectangle( DrawMode.Fill, x, y, Bounds.Width, Bounds.Height );
+        }
+    }
+
     class Window : Element
     {
         public Vector2 Camera = new Vector2();
@@ -32,6 +77,27 @@ namespace CodeEditor.UI
             Padding = new Vector4( 4, 4, 4, 4 );
 
             ComputeFontHeight();
+
+            var button = new WindowButton( ( WindowButton self ) =>
+            {
+                self.Parent.Destroy();
+            } ) { 
+                Parent = this 
+            };
+            button.SetIconID( 0 );
+            Children.Add( button );
+
+            ComputeLayout();
+        }
+
+        public override void ComputeLayout()
+        {
+            //  > Place Children (Buttons)
+            for ( int i = 0; i < Children.Count; i++ )
+            {
+                Element child = Children[i];
+                child.SetPos( Bounds.Width - (int) ( Padding.Z * 1.5f ) - child.Bounds.Width * ( i + 1 ), (int) ( Padding.Y * 1.25f ) );
+            }
         }
 
         public void ComputeFontHeight()
@@ -93,10 +159,10 @@ namespace CodeEditor.UI
             Graphics.Rectangle( DrawMode.Fill, new RectangleF( inner_x, inner_y, Bounds.Width - Padding.Z * 2, TitleHeight ) );
 
             Graphics.SetColor( TextColor );
-            Graphics.Print( Title, inner_x + Padding.X, inner_y + 1 );
+            Graphics.Print( Title, inner_x + Padding.X, inner_y + Padding.Y * .5f );
 
             var limit = 150;
-            Graphics.Printf( RightTitle(), inner_x + Padding.X + Bounds.Width - Padding.Z * 2 - Padding.X * 2 - limit, inner_y + 1, limit, AlignMode.Right );
+            Graphics.Printf( RightTitle(), inner_x + Padding.X + Bounds.Width - Padding.Z * 2 - Padding.X * 2 - Children.Count * 16 - limit, inner_y + Padding.Y * .5f, limit, AlignMode.Right );
         }
     }
 }

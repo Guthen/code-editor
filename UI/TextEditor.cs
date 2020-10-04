@@ -15,7 +15,6 @@ namespace CodeEditor.UI
         public int CounterWidth = 50;
         public int CounterBorderSpace = 10;
 
-        public HighlighterTheme HighlighterTheme;
         public HighlighterParser HighlighterParser;
 
         public List<string> Lines = new List<string>();
@@ -127,29 +126,29 @@ namespace CodeEditor.UI
             word = word.Trim();
 
             if ( new_line )
-                if ( current_color == HighlighterTheme.Comment )
+                if ( current_color == Main.CurrentTheme.Highlighter.Comment )
                     current_color = TextColor;
 
             if ( word.Length == 1 && HighlighterParser.String.Contains( word.ToString() ) )
-                if ( current_color == HighlighterTheme.String )
+                if ( current_color == Main.CurrentTheme.Highlighter.String )
                 {
                     current_color = TextColor;
-                    return HighlighterTheme.String;
+                    return Main.CurrentTheme.Highlighter.String;
                 }
                 else
-                    current_color = HighlighterTheme.String;
+                    current_color = Main.CurrentTheme.Highlighter.String;
             else if ( HighlighterParser.Comment.Contains( word ) )
-                current_color = HighlighterTheme.Comment;
+                current_color = Main.CurrentTheme.Highlighter.Comment;
 
             if ( !( current_color == TextColor ) )
                 return current_color;
 
             if ( HighlighterParser.Syntax.Contains( word ) )
-                return HighlighterTheme.Syntax;
+                return Main.CurrentTheme.Highlighter.Syntax;
             //if ( /*next_word == "(" &&*/ HighlighterParser.Function.Contains( word ) )
-            //    return HighlighterTheme.Function;
+            //    return Main.CurrentTheme.Highlighter.Function;
             if ( int.TryParse( word, out _ ) || HighlighterParser.Bool.Contains( word ) )
-                return HighlighterTheme.Number;
+                return Main.CurrentTheme.Highlighter.Number;
 
             return TextColor;
         }
