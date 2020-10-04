@@ -32,7 +32,7 @@ namespace CodeEditor
                 var value = JsonConvert.DeserializeObject<HighlighterParser>( json );
 
                 Parsers.Add( key, value );
-                Console.WriteLine( "Highlighter: load '{0}' for '{1}'", file, key );
+                Main.Log( string.Format( "Highlighter: load '{0}' for '{1}'", file, key ) );
             }
         }
 

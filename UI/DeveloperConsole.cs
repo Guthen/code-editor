@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Love;
+using File = System.IO.File;
 
 namespace CodeEditor.UI
 {
@@ -28,25 +31,51 @@ namespace CodeEditor.UI
                     return string.Join( " ", args );
                 }
             },
+            { 
+                "theme",
+                ( DeveloperConsole self, List<string> args ) =>
+                {
+                    if ( args.Count < 1 || Theme.Get( args[0] ) == null )
+                        return "ERROR: theme doesn't exists";
+
+                    Main.SetTheme( Theme.Get( args[0] ) );
+                    return string.Format( "Theme: set to '{0}'", args[0] );
+                }
+            },
             {
                 "file",
                 ( DeveloperConsole self, List<string> args ) =>
                 {
-                    //  > Check variables
+                    //  > Check Variables
+                    if ( args.Count < 2 )
+                        return "ERROR: must have 2 arguments : 'file <id> <path>'";
+
                     if ( !int.TryParse( args[0], out int id ) )
                         return "ERROR: failed to parse 'id'";
 
                     if ( id >= Elements.elements.Count || id < 0 )
                         return "ERROR: failed to get element";
 
-                    //  > Get element
+                    //  > Get Element
                     var element = Elements.elements[id];
                     if ( !( element is TextEditor ) )
                         return "ERROR: element is not a TextEditor";
 
-                    var path = @"D:\Projets\Lua\Car2Game\classic.lua";
-                    ( (TextEditor) element ).SetFile( path );
-                    return "File changed";
+                    var text_editor = (TextEditor) element;
+
+                    //  > Get Path
+                    var path = "";
+                    if ( Regex.Match( args[1], @"^\w:\/" ).Success )
+                        path = args[1];
+                    else
+                        path = Path.GetFullPath( "../" + args[1], text_editor.FilePath );
+
+                    //  > Set File
+                    if ( !File.Exists( path ) )
+                        return string.Format( "ERROR: '{0}' doesn't exist", path );
+
+                    text_editor.SetFile( path );
+                    return "";
                 }
             },
         };
@@ -132,7 +161,11 @@ namespace CodeEditor.UI
 
         public override void WheelMoved( int x, int y )
         {
-            Camera.Y = Math.Clamp( Camera.Y - y * 50, 0, LineHeight * Lines.Count * .75f );
+            var speed = -y * 50;
+            if ( Keyboard.IsDown( KeyConstant.LShift ) )
+                Camera.X = Math.Clamp( Camera.X + speed, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f );
+            else
+                Camera.Y = Math.Clamp( Camera.Y + speed, 0, LineHeight * Lines.Count * .75f );
         }
 
         public override void InnerRender()

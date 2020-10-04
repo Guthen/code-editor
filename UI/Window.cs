@@ -14,11 +14,11 @@ namespace CodeEditor.UI
         public int TitleHeight;
         public int BorderWide = 1;
 
-        public Color TextColor = new Color( 255, 247, 248, 255 );
-        public Color BorderColor = new Color( 9, 12, 8, 255 );
-        public Color BackgroundColor = new Color( 105, 109, 125, 255 );
-        public Color TitleBackgroundColor = new Color( 99, 105, 209, 255 );
-        public Color DiscretColor = new Color( 163, 163, 163, 255 );
+        public static Color TextColor = new Color( 255, 247, 248, 255 );
+        public static Color BorderColor = new Color( 9, 12, 8, 255 );
+        public static Color BackgroundColor = new Color( 105, 109, 125, 255 );
+        public static Color TitleBackgroundColor = new Color( 99, 105, 209, 255 );
+        public static Color DiscretColor = new Color( 163, 163, 163, 255 );
 
         public Font TextFont = Graphics.GetFont();
         public Font TitleFont = Graphics.GetFont();

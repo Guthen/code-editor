@@ -21,7 +21,7 @@ namespace CodeEditor.UI
         public List<string> Lines = new List<string>();
         public string Text {
             get {
-                return String.Join( "\r\n", Lines );
+                return string.Join( "\r\n", Lines );
             }
             set {
                 Lines.Clear();
@@ -44,7 +44,7 @@ namespace CodeEditor.UI
 
             SetRightTitle( () =>
             {
-                return String.Format( "L={0} C={1}", Cursor.Y + 1, Cursor.X + 1 );
+                return string.Format( "L={0} C={1}", Cursor.Y + 1, Cursor.X + 1 );
             } );
 
             ComputeFontHeight();
@@ -55,6 +55,7 @@ namespace CodeEditor.UI
             Text = File.ReadAllText( path );
             Title = Path.GetFileName( path );
             FilePath = path;
+            Main.Log( string.Format( "Load '{0}'", path ) );
 
             //  > Reset Cursor
             Cursor.X = 0;
@@ -73,7 +74,7 @@ namespace CodeEditor.UI
         public void Save()
         {
             File.WriteAllLines( FilePath, Lines );
-            Console.WriteLine( "Saved {0}", FilePath );
+            Main.Log( string.Format( "Saved '{0}'", FilePath ) );
         }
 
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( Lines[Cursor.Y].Length, 0 ) );
