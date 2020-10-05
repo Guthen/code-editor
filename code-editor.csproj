@@ -21,8 +21,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)Assets&quot; &quot;$(TargetDir)Assets&quot; /E /Y /Q /R /C /H" />
-  </Target>
-
 </Project>

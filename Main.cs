@@ -25,15 +25,6 @@ namespace CodeEditor
         public static Theme CurrentTheme;
         public static void SetTheme( Theme theme )
         {
-            //  > Set TextEditor's Highlighter
-            //foreach ( Element element in Elements.elements )
-            //{
-            //    if ( !( element is TextEditor ) ) continue;
-
-            //    var text_editor = (TextEditor) element;
-            //    text_editor.HighlighterTheme = theme.Highlighter;
-            //}
-
             //  > Window's colors
             Window.TextColor = theme.Window.TextColor;
             Window.BorderColor = theme.Window.BorderColor;
@@ -56,13 +47,6 @@ namespace CodeEditor
             DevConsole = new DeveloperConsole();
 
             //  > Coolors: https://coolors.co/090c08-fff7f8-696d7d-ffe74c-ff5964-6369d1-6cae75-8b9474
-            //HighlighterTheme highlighter = new HighlighterTheme()
-            //{
-            //    String = new Color( 255, 231, 76, 255 ),
-            //    Number = new Color( 146, 213, 230, 255 ),
-            //    Comment = new Color( 108, 174, 117, 255 ),
-            //    Syntax = new Color( 255, 89, 100, 255 ),
-            //};
             HighlighterParser.Load( "Assets/Highlighters" );
 
             //  > Elements
@@ -74,7 +58,7 @@ namespace CodeEditor
 
             var te_1 = new TextEditor();
             te_1.SetFont( TextFont, TitleFont );
-            te_1.SetFile( @"C:\Program Files (x86)\Steam\steamapps\common\GarrysMod\garrysmod\addons\GNLib\certified_addons.json" );
+            te_1.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
             te_1.SetPos( te_2.Bounds.Width );
             te_1.SetSize( Graphics.GetWidth() - te_2.Bounds.Width, 400 );
             //te_1.HighlighterTheme = highlighter;

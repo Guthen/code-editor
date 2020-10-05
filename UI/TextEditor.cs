@@ -89,6 +89,7 @@ namespace CodeEditor.UI
 
         public void Save()
         {
+            if ( FilePath.Length <= 0 ) return;
             File.WriteAllLines( FilePath, Lines );
             Main.Log( string.Format( "Saved '{0}'", FilePath ) );
         }
@@ -102,13 +103,13 @@ namespace CodeEditor.UI
         {
             //Main.Log( string.Format( "Run '{0}'", FilePath ) );
             if ( !FilePath.EndsWith( "py" ) ) return;
-            Main.Log( string.Format( "> '{0}' '{1}'", Program.Preferences.Interpreters.Python, FilePath ) );
+            Main.Log( string.Format( "> '{0}' '{1}'", Program.Preferences.Interpreters["Python"], FilePath ) );
 
             var process = new Process()
             {
                 StartInfo =
                 {
-                    FileName = Program.Preferences.Interpreters.Python,
+                    FileName = Program.Preferences.Interpreters["Python"],
                     Arguments = FilePath,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -132,12 +133,21 @@ namespace CodeEditor.UI
             Cursor.Y = GetClampedCursorY( y );
             Cursor.X = GetClampedCursorX( x );
 
-            var cursor_y = (int) ( Cursor.Y * LineHeight - Camera.Y ) + TitleHeight * 2;
-            if ( !Intersect( (int) ( Cursor.X - Camera.X ), cursor_y ) )
-            {
-                Console.WriteLine( "hey" );
-                SetCameraY( Camera.Y + ( cursor_y > Bounds.Y + Bounds.Height ? LineHeight : -LineHeight ) );
-            }
+            //  > Cursor Move on Y-Axis
+            var cursor_y = Cursor.Y * LineHeight;
+            var view_height = Bounds.Height - TitleHeight * 2 - ( Padding.Y + Padding.Z );
+            if ( cursor_y < Camera.Y )
+                SetCameraY( cursor_y );
+            else if ( cursor_y > Camera.Y + view_height )
+                SetCameraY( cursor_y - view_height );
+
+            //  > Cursor Move on X-Axis
+            var cursor_x = GetCursorX();
+            var view_width = Bounds.Width - ( CounterWidth + CounterBorderSpace ) - ( Padding.X + Padding.W ) - GetCursorCharWide() * 2;
+            if ( cursor_x < Camera.X )
+                SetCameraX( cursor_x );
+            else if ( cursor_x > Camera.X + view_width )
+                SetCameraX( cursor_x - view_width );
         }
 
         public void MoveCursorTowards( int x, int y )
@@ -168,7 +178,7 @@ namespace CodeEditor.UI
                 }
                 //  > Go to next char
                 else 
-                    Cursor.X = new_x;
+                    SetCursorPos( new_x, Cursor.Y );
             }
         }
 
@@ -255,6 +265,16 @@ namespace CodeEditor.UI
         public void SetCameraY( float cam_y )
         {
             Camera.Y = Math.Clamp( cam_y, 0, LineHeight * Lines.Count * .95f );
+        }
+
+        public override void MousePressed( float x, float y, int button, bool is_touch )
+        {
+            y = y - Bounds.Y;
+            x = x - Bounds.X;
+
+            var y_line = (int) Math.Floor( ( Camera.Y + y ) / LineHeight - .5f ) - 1;
+            var x_char = (int) Math.Floor( ( Camera.X + x - ( CounterBorderSpace + CounterWidth ) ) / GetCursorCharWide() - .5f );
+            SetCursorPos( x_char, y_line );
         }
 
         public override void WheelMoved( int x, int y )
@@ -372,7 +392,7 @@ namespace CodeEditor.UI
         public override void TextInput( string text )
         {
             Append( text );
-            Cursor.X++;
+            SetCursorPos( Cursor.X + 1, Cursor.Y );
             //Console.WriteLine( "insert '{0}'", text );
         }
 

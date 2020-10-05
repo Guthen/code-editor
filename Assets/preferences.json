@@ -3,7 +3,7 @@
   "WindowHeight": 720,
   "WindowFullscreen": false,
   "Interpreters": {
-    "py": "K:/Programmes/Python 3.8.5/python.exe"
+    "Python": "K:/Programmes/Python 3.8.5/python.exe"
   },
   "Theme": "fieldlights"
 }

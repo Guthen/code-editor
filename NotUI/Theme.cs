@@ -5,6 +5,7 @@ using File = System.IO.File;
 using Love;
 using Newtonsoft.Json;
 
+#pragma warning disable CS0649
 namespace CodeEditor
 {
     struct HighlighterTheme

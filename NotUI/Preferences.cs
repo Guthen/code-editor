@@ -3,20 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+#pragma warning disable CS0649
 namespace CodeEditor.NotUI
 {
-    struct Interpreters
-    {
-        [JsonProperty( "py" )]
-        public string Python;
-    }
-
     class Preferences
     {
         public int WindowWidth;
         public int WindowHeight;
         public bool WindowFullscreen;
-        public Interpreters Interpreters;
+        public Dictionary<string, string> Interpreters;
 
         public string Theme;
 

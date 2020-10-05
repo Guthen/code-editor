@@ -5,6 +5,7 @@ using System.IO;
 using File = System.IO.File;
 using Newtonsoft.Json;
 
+#pragma warning disable CS0649
 namespace CodeEditor
 {
     class HighlighterParser
