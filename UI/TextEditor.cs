@@ -411,7 +411,7 @@ namespace CodeEditor.UI
             {
                 //  > Line
                 int off_x = 0;
-                MatchCollection matches = Regex.Matches( Lines[i], @"\w+|--|\W" );
+                MatchCollection matches = Regex.Matches( Lines[i], @"\w+|--|\\\W|\W" );
                 for ( int u = 0; u < matches.Count; u++ )
                 {
                     Match match = matches[u];

@@ -1,0 +1,37 @@
+{
+	"Syntax": [
+		"if",
+		"else",
+		"!",
+		"&&",
+		"||",
+		"using",
+		"namespace",
+		"class",
+		"static",
+		"void",
+		"int",
+		"bool",
+		"private",
+		"public",
+		"protected",
+		"return",
+        "throw",
+        "new",
+        "{", "}", "[", "]", ",",
+		"=", "+", "-", "*", "/"
+	],
+	"String": [
+		"\"", 
+		"'"
+	],
+	"Comment": [
+		"//",
+		"/*",
+		"#"
+	],
+	"Bool": [
+		"true", 
+		"false"
+	]
+}
