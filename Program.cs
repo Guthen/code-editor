@@ -1,4 +1,4 @@
-﻿using CodeEditor.NotUI;
+using CodeEditor.NotUI;
 using Love;
 using Newtonsoft.Json;
 using System;

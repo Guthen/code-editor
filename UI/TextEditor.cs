@@ -29,8 +29,10 @@ namespace CodeEditor.UI
             set {
                 Lines.Clear();
 
-                foreach ( string line in value.Split( "\r\n" ) )
-                    Lines.Add( line );
+                var lines = value.Split( "\r\n" );
+                for ( int i = 0; i < lines.Length; i++ )
+                    if ( i < lines.Length - 1 )
+                        Lines.Add( lines[i] );
             }
         }
 
@@ -113,7 +115,8 @@ namespace CodeEditor.UI
                     Arguments = FilePath,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    CreateNoWindow = true,
+                    RedirectStandardInput = true,
+                    //CreateNoWindow = true,
                     UseShellExecute = false,
                 }
             };
@@ -123,6 +126,8 @@ namespace CodeEditor.UI
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
+            //process.StandardInput.AutoFlush = true;
+            process.StandardInput.Write( "yes" );
         }
 
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( Lines[Cursor.Y].Length, 0 ) );
