@@ -52,13 +52,13 @@ namespace CodeEditor
             //  > Elements
             var te_2 = new TextEditor();
             te_2.SetFont( TextFont, TitleFont );
-            te_2.SetFile( @"K:\Projets\Python\test.py" );
+            te_2.SetFile( @"K:\Projets\Python\py-icewalker\main_4.py" );
             te_2.SetSize( (int) ( Graphics.GetWidth() * .65f ), Graphics.GetHeight() );
             //te_2.HighlighterTheme = highlighter;
 
             var te_1 = new TextEditor();
             te_1.SetFont( TextFont, TitleFont );
-            te_1.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
+            te_1.SetFile( @"K:\Projets\C#\code-editor\Assets/Themes/fieldlights.json" );
             te_1.SetPos( te_2.Bounds.Width );
             te_1.SetSize( Graphics.GetWidth() - te_2.Bounds.Width, 400 );
             //te_1.HighlighterTheme = highlighter;

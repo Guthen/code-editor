@@ -14,10 +14,11 @@ namespace CodeEditor.NotUI
         public Dictionary<string, string> Interpreters;
 
         public string Theme;
+        public static string Path = "Assets/preferences.json";
 
         public void Save()
         {
-            File.WriteAllText( "Assets/preferences.json", JsonConvert.SerializeObject( this, Formatting.Indented ) );
+            File.WriteAllText( Path, JsonConvert.SerializeObject( this, Formatting.Indented ) );
         }
     }
 }

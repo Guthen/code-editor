@@ -13,7 +13,7 @@ namespace CodeEditor
         [STAThread]
         static void Main( string[] args )
         {
-            Preferences = JsonConvert.DeserializeObject<Preferences>( File.ReadAllText( "Assets/preferences.json" ) );
+            Preferences = JsonConvert.DeserializeObject<Preferences>( File.ReadAllText( Preferences.Path ) );
 
             Boot.Run( new Main(), new BootConfig()
             {
