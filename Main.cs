@@ -58,7 +58,7 @@ namespace CodeEditor
 
             var te_1 = new TextEditor();
             te_1.SetFont( TextFont, TitleFont );
-            te_1.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
+            te_1.SetFile( @"K:\Projets\C#\code-editor\Assets/preferences.json" );
             te_1.SetPos( te_2.Bounds.Width );
             te_1.SetSize( Graphics.GetWidth() - te_2.Bounds.Width, 400 );
             //te_1.HighlighterTheme = highlighter;

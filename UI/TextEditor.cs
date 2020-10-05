@@ -31,7 +31,7 @@ namespace CodeEditor.UI
 
                 var lines = value.Split( "\r\n" );
                 for ( int i = 0; i < lines.Length; i++ )
-                    if ( i < lines.Length - 1 )
+                    if ( lines[i].Length > 0 || i < lines.Length - 1 )
                         Lines.Add( lines[i] );
             }
         }
@@ -115,8 +115,7 @@ namespace CodeEditor.UI
                     Arguments = FilePath,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    RedirectStandardInput = true,
-                    //CreateNoWindow = true,
+                    CreateNoWindow = true,
                     UseShellExecute = false,
                 }
             };
@@ -126,8 +125,6 @@ namespace CodeEditor.UI
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-            //process.StandardInput.AutoFlush = true;
-            process.StandardInput.Write( "yes" );
         }
 
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( Lines[Cursor.Y].Length, 0 ) );
@@ -196,8 +193,12 @@ namespace CodeEditor.UI
             word = word.Trim();
 
             if ( new_line )
+            {
                 if ( current_color == Main.CurrentTheme.Highlighter.Comment )
                     current_color = TextColor;
+            }
+            else if ( current_color == Main.CurrentTheme.Highlighter.Comment )
+                return current_color;
 
             if ( word.Length == 1 && HighlighterParser.String.Contains( word.ToString() ) )
                 if ( current_color == Main.CurrentTheme.Highlighter.String )
