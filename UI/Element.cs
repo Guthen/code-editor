@@ -28,6 +28,8 @@ namespace CodeEditor.UI
 
             foreach ( Element element in elements )
             {
+                if ( name == "Render" && !element.Visible ) continue;
+
                 Type type = element.GetType();
                 MethodInfo method = type.GetMethod( name );
                 method.Invoke( element, args );
@@ -61,6 +63,7 @@ namespace CodeEditor.UI
 
         public Rectangle Bounds { get; set; } = new Rectangle( 0, 0, 450, 300 );
         public bool IsFocus = false;
+        public bool Visible = true;
         public int ID = 0;
 
         public Element()

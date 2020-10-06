@@ -15,6 +15,8 @@ namespace CodeEditor
         public string[] Comment;
         public string[] Bool;
 
+        public string WordPattern = @"\w+|--|\\\W|\W";
+
         public static Dictionary<string, HighlighterParser> Parsers = new Dictionary<string, HighlighterParser>();
         public static void Load( string path )
         {

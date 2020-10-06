@@ -16,6 +16,8 @@ namespace CodeEditor.UI
     {
         public Point Cursor = new Point();
 
+        public WindowButton RunButton;
+
         public int CounterWidth = 50;
         public int CounterBorderSpace = 10;
 
@@ -51,6 +53,9 @@ namespace CodeEditor.UI
             Children.Add( new WindowButton( 1, this, ( WindowButton self ) => ( (TextEditor) self.Parent ).Save() ) );
             //  > Load
             Children.Add( new WindowButton( 2, this, ( WindowButton self ) => ( (TextEditor) self.Parent ).Load() ) );
+            //  > Run
+            RunButton = new WindowButton( 4, this, ( WindowButton self ) => Run() );
+            RunButton.Visible = false;
         }
 
         public void SetFile( string path )
@@ -83,8 +88,21 @@ namespace CodeEditor.UI
                 HighlighterParser = highlighter;
                 if ( extension == "py" )
                 {
-                    Children.Add( new WindowButton( 4, this, ( WindowButton self ) => Run() ) );
-                    ComputeLayout();
+                    if ( !Children.Contains( RunButton ) )
+                    {
+                        Children.Add( RunButton );
+                        RunButton.Visible = true;
+                        ComputeLayout();
+                    }
+                }
+                else
+                {
+                    if ( Children.Contains( RunButton ) )
+                    {
+                        Children.Remove( RunButton );
+                        RunButton.Visible = false;
+                        ComputeLayout();
+                    }
                 }
             }
         }
@@ -413,7 +431,7 @@ namespace CodeEditor.UI
                 //Console.WriteLine( i );
                 //  > Line
                 int off_x = 0;
-                MatchCollection matches = Regex.Matches( Lines[i], @"\w+|--|\\\W|\W" );
+                MatchCollection matches = Regex.Matches( Lines[i], HighlighterParser.WordPattern );
                 for ( int u = 0; u < matches.Count; u++ )
                 {
                     Match match = matches[u];
