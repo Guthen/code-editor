@@ -2,6 +2,7 @@ using CodeEditor.NotUI;
 using Love;
 using Newtonsoft.Json;
 using System;
+using System.IO;
 using File = System.IO.File;
 
 namespace CodeEditor
@@ -9,13 +10,24 @@ namespace CodeEditor
     class Program
     {
         public static Preferences Preferences;
+        public static Boot Boot;
 
         [STAThread]
         static void Main( string[] args )
         {
-            Preferences = JsonConvert.DeserializeObject<Preferences>( File.ReadAllText( Preferences.Path ) );
+            try
+            {
+                Preferences = JsonConvert.DeserializeObject<Preferences>( File.ReadAllText( Preferences.Path ) );
+            }
+            catch ( IOException )
+            {
+                Preferences = new Preferences()
+                {
+                    Success = false,
+                };
+            }
 
-            Boot.Run( new Main(), new BootConfig()
+            Love.Boot.Run( new Boot(), new BootConfig()
             {
                 WindowCentered = true,
                 WindowDisplay = 0,

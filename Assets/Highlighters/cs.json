@@ -18,6 +18,8 @@
 		"return",
         "throw",
         "new",
+		"try",
+		"catch",
         "{", "}", "[", "]", ",",
 		"=", "+", "-", "*", "/"
 	],
@@ -27,12 +29,19 @@
 	],
 	"Comment": [
 		"//",
-		"/*",
 		"#"
 	],
+	"MultilineComment": {
+		"Start": [
+			"/*",
+		],
+		"End": [
+			"*/"
+		]
+	},
 	"Bool": [
 		"true", 
 		"false"
 	],
-	"WordPattern": "\\w+|\/\/|\\\\\\W|\\W"
+	"WordPattern": "\\w+|\\/\\*|\\*\\/|\/\/|\\\\\\W|\\W"
 }

@@ -43,23 +43,23 @@ namespace CodeEditor.UI
                     if ( args.Count < 1 || Theme.Get( args[0] ) == null )
                         return "ERROR: theme doesn't exists";
 
-                    Main.SetTheme( Theme.Get( args[0] ) );
+                    Boot.SetTheme( Theme.Get( args[0] ) );
                     Program.Preferences.Theme = args[0];
                     Program.Preferences.Save();
                     return string.Format( "Theme: set to '{0}'", args[0] );
                 }
             },
-            {
-                "cd",
-                ( DeveloperConsole self, List<string> args ) =>
-                {
-                    if ( args.Count < 1 || !Directory.Exists( args[0] ) )
-                        return "ERROR: path doesn't exists";
+            //{
+            //    "cd",
+            //    ( DeveloperConsole self, List<string> args ) =>
+            //    {
+            //        if ( args.Count < 1 || !Directory.Exists( args[0] ) )
+            //            return "ERROR: path doesn't exists";
 
-                    self.CurrentDirectory = args[0];
-                    return string.Format( "Console: move to '{0}'", args[0] );
-                }
-            },
+            //        self.CurrentDirectory = args[0];
+            //        return string.Format( "Console: move to '{0}'", args[0] );
+            //    }
+            //},
             {
                 "file",
                 ( DeveloperConsole self, List<string> args ) =>
@@ -78,12 +78,16 @@ namespace CodeEditor.UI
                     //  > Get Element
                     var text_editor = (TextEditor) text_editors[id];
 
+                    //  > Get File Path Argument
+                    var file_path = string.Join( " ", args.GetRange( 1, args.Count - 1 ) );
+
                     //  > Get Path
                     var path = "";
-                    if ( Regex.Match( args[1], @"^\w:(\/|\\)" ).Success )
-                        path = args[1];
+                    if ( Regex.Match( file_path, @"^\w:(\/|\\)" ).Success )
+                        path = file_path;
                     else
-                        path = Path.Combine( self.CurrentDirectory, args[1] );
+                        path = Path.Combine( text_editor.FilePath, "../" + file_path );
+                    path = Path.GetFullPath( path );
 
                     //  > Set File
                     if ( !File.Exists( path ) )
@@ -96,7 +100,6 @@ namespace CodeEditor.UI
         };
 
         public string PromptCommand = "";
-        public string CurrentDirectory = "";
 
         public DeveloperConsole()
         {
@@ -141,9 +144,9 @@ namespace CodeEditor.UI
         public Color GetLineColor( string line )
         {
             if ( line.StartsWith( '>' ) )
-                return Main.CurrentTheme.Window.DiscretColor;
+                return Boot.CurrentTheme.Window.DiscretColor;
             if ( line.StartsWith( "ERROR" ) )
-                return Main.CurrentTheme.Highlighter.Syntax;
+                return Boot.CurrentTheme.Highlighter.Syntax;
 
             return TextColor;
         }

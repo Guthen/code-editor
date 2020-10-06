@@ -8,14 +8,26 @@ using Newtonsoft.Json;
 #pragma warning disable CS0649
 namespace CodeEditor
 {
+    struct MultilineComment
+    {
+        public string[] Start;
+        public string[] End;
+    }
+
     class HighlighterParser
     {
         public string[] Syntax;
         public string[] String;
         public string[] Comment;
         public string[] Bool;
+        public string WordPattern = @"\w+|\\\W|\W";
+        public MultilineComment MultilineComment = new MultilineComment()
+        {
+            Start = new string[] { },
+            End = new string[] { },
+        };
 
-        public string WordPattern = @"\w+|--|\\\W|\W";
+        public bool Success = true;
 
         public static Dictionary<string, HighlighterParser> Parsers = new Dictionary<string, HighlighterParser>();
         public static void Load( string path )
@@ -27,7 +39,7 @@ namespace CodeEditor
                 var value = JsonConvert.DeserializeObject<HighlighterParser>( json );
 
                 Parsers.Add( key, value );
-                Main.Log( string.Format( "Highlighter: load '{0}' for '{1}'", file, key ) );
+                Boot.Log( string.Format( "Highlighter: load '{0}' for '{1}'", file, key ) );
             }
         }
 

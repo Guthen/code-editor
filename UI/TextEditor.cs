@@ -9,6 +9,7 @@ using System.Windows;
 using Point = Love.Point;
 using Dapplo.Log;
 using System.Diagnostics;
+using CodeEditor.NotUI;
 
 namespace CodeEditor.UI
 {
@@ -35,6 +36,8 @@ namespace CodeEditor.UI
                 for ( int i = 0; i < lines.Length; i++ )
                     if ( lines[i].Length > 0 || i < lines.Length - 1 )
                         Lines.Add( lines[i] );
+
+                if ( Lines.Count == 0 ) Lines.Add( "" );
             }
         }
 
@@ -65,11 +68,11 @@ namespace CodeEditor.UI
                 Text = File.ReadAllText( path );
                 Title = Path.GetFileName( path );
                 FilePath = path;
-                Main.Log( string.Format( "File: load '{0}'", path ) );
+                Boot.Log( string.Format( "File: load '{0}'", path ) );
             }
             catch ( IOException )
             {
-                Main.Log( string.Format( "ERROR: failed loading '{0}'", path ) );
+                Boot.Log( string.Format( "ERROR: failed loading '{0}'", path ) );
             }
 
             //  > Reset Cursor
@@ -86,7 +89,7 @@ namespace CodeEditor.UI
             if ( !( highlighter == null ) )
             {
                 HighlighterParser = highlighter;
-                if ( extension == "py" )
+                if ( Program.Preferences.Interpreters.ContainsKey( extension ) )
                 {
                     if ( !Children.Contains( RunButton ) )
                     {
@@ -105,31 +108,36 @@ namespace CodeEditor.UI
                     }
                 }
             }
+            else
+                HighlighterParser = new HighlighterParser();
         }
 
         public void Save()
         {
             if ( FilePath.Length <= 0 ) return;
             File.WriteAllLines( FilePath, Lines );
-            Main.Log( string.Format( "Saved '{0}'", FilePath ) );
+            Boot.Log( string.Format( "Saved '{0}'", FilePath ) );
         }
 
         public void Load()
         {
-            Main.Log( "ERROR: not implemented" );   
+            Boot.Log( "ERROR: not implemented" );   
         }
 
         public void Run()
         {
             //Main.Log( string.Format( "Run '{0}'", FilePath ) );
-            if ( !FilePath.EndsWith( "py" ) ) return;
-            Main.Log( string.Format( "> '{0}' '{1}'", Program.Preferences.Interpreters["Python"], FilePath ) );
+            var extension = Path.GetExtension( FilePath ).Replace( ".", "" );
+            if ( !Program.Preferences.Interpreters.ContainsKey( extension ) ) return;
+
+            var interpreter = Program.Preferences.Interpreters[extension];
+            Boot.Log( string.Format( "> '{0}' '{1}'", interpreter, FilePath ) );
 
             var process = new Process()
             {
                 StartInfo =
                 {
-                    FileName = Program.Preferences.Interpreters["Python"],
+                    FileName = interpreter,
                     Arguments = FilePath,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -138,8 +146,8 @@ namespace CodeEditor.UI
                 }
             };
 
-            process.OutputDataReceived += Main.DevConsole.OutputHandler;
-            process.ErrorDataReceived += Main.DevConsole.OutputHandler;
+            process.OutputDataReceived += Boot.DevConsole.OutputHandler;
+            process.ErrorDataReceived += Boot.DevConsole.OutputHandler;
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
@@ -202,42 +210,62 @@ namespace CodeEditor.UI
             }
         }
 
+        bool is_multiline_comment;
         Color current_color;
         public Color GetWordColor( string word, bool new_line = false/*, string next_word = ""*/ )
         {
-            if ( HighlighterParser == null )
+            if ( HighlighterParser == null || !HighlighterParser.Success )
                 return TextColor;
 
             word = word.Trim();
 
+            //  > End of Multi-Line Comment
+            if ( HighlighterParser.MultilineComment.End.Contains( word ) && is_multiline_comment )
+            {
+                is_multiline_comment = false;
+                current_color = TextColor;
+                return Boot.CurrentTheme.Highlighter.Comment;
+            }
+            //  > End of Inline-Comment Color
             if ( new_line )
             {
-                if ( current_color == Main.CurrentTheme.Highlighter.Comment )
+                if ( current_color == Boot.CurrentTheme.Highlighter.Comment && !is_multiline_comment )
                     current_color = TextColor;
             }
-            else if ( current_color == Main.CurrentTheme.Highlighter.Comment )
+            //  > Get Comment Color
+            else if ( current_color == Boot.CurrentTheme.Highlighter.Comment )
                 return current_color;
 
+            //  > String
             if ( word.Length == 1 && HighlighterParser.String.Contains( word.ToString() ) )
-                if ( current_color == Main.CurrentTheme.Highlighter.String )
+                if ( current_color == Boot.CurrentTheme.Highlighter.String )
                 {
                     current_color = TextColor;
-                    return Main.CurrentTheme.Highlighter.String;
+                    return Boot.CurrentTheme.Highlighter.String;
                 }
                 else
-                    current_color = Main.CurrentTheme.Highlighter.String;
+                    current_color = Boot.CurrentTheme.Highlighter.String;
+            //  > Comment
             else if ( HighlighterParser.Comment.Contains( word ) )
-                current_color = Main.CurrentTheme.Highlighter.Comment;
+                current_color = Boot.CurrentTheme.Highlighter.Comment;
+            //  > Multi-line Comment
+            else if ( HighlighterParser.MultilineComment.Start.Contains( word ) )
+            {
+                current_color = Boot.CurrentTheme.Highlighter.Comment;
+                is_multiline_comment = true;
+            }
 
-            if ( !( current_color == TextColor ) )
+            if ( current_color == Boot.CurrentTheme.Highlighter.Comment || current_color == Boot.CurrentTheme.Highlighter.String )
                 return current_color;
 
+            //  > Syntax
             if ( HighlighterParser.Syntax.Contains( word ) )
-                return Main.CurrentTheme.Highlighter.Syntax;
+                return Boot.CurrentTheme.Highlighter.Syntax;
             //if ( /*next_word == "(" &&*/ HighlighterParser.Function.Contains( word ) )
             //    return Main.CurrentTheme.Highlighter.Function;
+            //  > Number and Booleans
             if ( int.TryParse( word, out _ ) || HighlighterParser.Bool.Contains( word ) )
-                return Main.CurrentTheme.Highlighter.Number;
+                return Boot.CurrentTheme.Highlighter.Number;
 
             return TextColor;
         }
@@ -426,9 +454,10 @@ namespace CodeEditor.UI
             //  > Text
             Graphics.Translate( 0, TitleHeight / 4 );
             Graphics.SetFont( TextFont );
+
+            current_color = TextColor;
             for ( int i = Math.Max( 0, GetLineY( Camera.Y + TitleHeight ) ); i < Math.Min( Lines.Count, GetLineY( Camera.Y + Bounds.Height + TitleHeight ) ); i++ )
             {
-                //Console.WriteLine( i );
                 //  > Line
                 int off_x = 0;
                 MatchCollection matches = Regex.Matches( Lines[i], HighlighterParser.WordPattern );

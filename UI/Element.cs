@@ -61,6 +61,7 @@ namespace CodeEditor.UI
         public Element Parent;
         public List<Element> Children = new List<Element>();
 
+        public RectangleF FractionBounds = new RectangleF();
         public Rectangle Bounds { get; set; } = new Rectangle( 0, 0, 450, 300 );
         public bool IsFocus = false;
         public bool Visible = true;
@@ -105,6 +106,27 @@ namespace CodeEditor.UI
 
             Bounds = bounds;
             ComputeLayout();
+        }
+
+        public void ComputeBounds()
+        {
+            if ( FractionBounds.IsEmpty ) return;
+
+            int w = Graphics.GetWidth();
+            int h = Graphics.GetHeight();
+
+            SetPos( (int) ( FractionBounds.X * w ), (int) ( FractionBounds.Y * h ) );
+            SetSize( (int) ( FractionBounds.Width * Graphics.GetWidth() ), (int) ( FractionBounds.Height * h ) );
+        }
+        public void SetFractionSize( float w, float h )
+        {
+            FractionBounds.Width = w;
+            FractionBounds.Height = h;
+        }
+        public void SetFractionPos( float x, float y )
+        {
+            FractionBounds.X = x;
+            FractionBounds.Y = y;
         }
 
         public Rectangle GetAbsoluteBounds()

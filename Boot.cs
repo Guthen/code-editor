@@ -6,10 +6,11 @@ using CodeEditor.UI;
 using System.IO;
 using Window = CodeEditor.UI.Window;
 using Newtonsoft.Json;
+using CodeEditor.NotUI;
 
 namespace CodeEditor
 {
-    class Main : Scene
+    class Boot : Scene
     {
         //  > Developer Console
         public static DeveloperConsole DevConsole;
@@ -46,26 +47,33 @@ namespace CodeEditor
 
             DevConsole = new DeveloperConsole();
 
+            if ( !Program.Preferences.Success )
+                Log( string.Format( "ERROR: failed to load '{0}'", Preferences.Path ) );
+            else
+                Log( string.Format( "Preferences: load '{0}'", Preferences.Path ) );
+
             //  > Coolors: https://coolors.co/090c08-fff7f8-696d7d-ffe74c-ff5964-6369d1-6cae75-8b9474
             HighlighterParser.Load( "Assets/Highlighters" );
 
             //  > Elements
             var te_2 = new TextEditor();
             te_2.SetFont( TextFont, TitleFont );
-            te_2.SetFile( @"K:\Projets\Python\py-icewalker\main_4.py" );
-            te_2.SetSize( (int) ( Graphics.GetWidth() * .65f ), Graphics.GetHeight() );
-            //te_2.HighlighterTheme = highlighter;
+            te_2.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
+            te_2.SetFractionPos( 0, 0 );
+            te_2.SetFractionSize( .65f, 1 );
+            te_2.ComputeBounds();
 
             var te_1 = new TextEditor();
             te_1.SetFont( TextFont, TitleFont );
-            te_1.SetFile( @"K:\Projets\C#\code-editor\Assets/Themes/fieldlights.json" );
-            te_1.SetPos( te_2.Bounds.Width );
-            te_1.SetSize( Graphics.GetWidth() - te_2.Bounds.Width, 400 );
-            //te_1.HighlighterTheme = highlighter;
+            te_1.SetFile( @"K:\Projets\Python\test.py" );
+            te_1.SetFractionPos( te_2.FractionBounds.Width, 0 );
+            te_1.SetFractionSize( 1 - te_2.FractionBounds.Width, .65f );
+            te_1.ComputeBounds();
 
             DevConsole.SetFont( TextFont, TitleFont );
-            DevConsole.SetPos( te_1.Bounds.X, te_1.Bounds.Y + te_1.Bounds.Height );
-            DevConsole.SetSize( te_1.Bounds.Width, Graphics.GetHeight() - te_1.Bounds.Height );
+            DevConsole.SetFractionPos( te_1.FractionBounds.X, te_1.FractionBounds.Y + te_1.FractionBounds.Height );
+            DevConsole.SetFractionSize( te_1.FractionBounds.Width, 1 - te_1.FractionBounds.Height );
+            DevConsole.ComputeBounds();
 
             //var te_3 = new TextEditor();
             //te_3.SetFont( TextFont, TitleFont );
@@ -92,6 +100,12 @@ namespace CodeEditor
 
         public override void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat ) => Elements.CallFocus( "KeyPressed", key, scancode, is_repeat );
         public override void TextInput( string text ) => Elements.CallFocus( "TextInput", text );
+
+        public override void WindowResize( int w, int h )
+        {
+            Elements.Call( "ComputeBounds" );
+            //Elements.Call( "ComputeLayout" );
+        }
 
         public override void MousePressed( float x, float y, int button, bool is_touch )
         {

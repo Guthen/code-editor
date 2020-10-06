@@ -43,7 +43,7 @@ namespace CodeEditor
                 var value = JsonConvert.DeserializeObject<Theme>( json );
 
                 Themes.Add( key, value );
-                Main.Log( string.Format( "Theme: load '{0}' for '{1}'", file, key ) );
+                Boot.Log( string.Format( "Theme: load '{0}' for '{1}'", file, key ) );
             }
         }
 

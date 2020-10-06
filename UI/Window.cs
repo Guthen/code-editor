@@ -10,7 +10,7 @@ namespace CodeEditor.UI
         public Image Image = Graphics.NewImage( "Assets/Images/icons.png" );
         public Quad Quad;
 
-        public Action<WindowButton> Action = ( WindowButton self ) => { Main.Log( "Clicked" ); };
+        public Action<WindowButton> Action = ( WindowButton self ) => { Boot.Log( "Clicked" ); };
 
         public WindowButton( int icon_id, Element parent, Action<WindowButton> action )
         {

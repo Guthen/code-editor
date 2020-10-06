@@ -8,12 +8,13 @@ namespace CodeEditor.NotUI
 {
     class Preferences
     {
-        public int WindowWidth;
-        public int WindowHeight;
-        public bool WindowFullscreen;
-        public Dictionary<string, string> Interpreters;
+        public int WindowWidth = 1080;
+        public int WindowHeight = 720;
+        public bool WindowFullscreen = false;
+        public Dictionary<string, string> Interpreters = new Dictionary<string, string>();
 
-        public string Theme;
+        public bool Success = true;
+        public string Theme = "default";
         public static string Path = "Assets/preferences.json";
 
         public void Save()
