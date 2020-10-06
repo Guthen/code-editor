@@ -273,14 +273,15 @@ namespace CodeEditor.UI
             Camera.Y = Math.Clamp( cam_y, 0, LineHeight * Lines.Count * .95f );
         }
 
+        public int GetLineX( float x ) => (int) Math.Floor( ( x - ( CounterBorderSpace + CounterWidth ) ) / GetCursorCharWide() - .5f );
+        public int GetLineY( float y ) => (int) Math.Floor( y / LineHeight - .5f ) - 1;
+
         public override void MousePressed( float x, float y, int button, bool is_touch )
         {
             y = y - Bounds.Y;
             x = x - Bounds.X;
 
-            var y_line = (int) Math.Floor( ( Camera.Y + y ) / LineHeight - .5f ) - 1;
-            var x_char = (int) Math.Floor( ( Camera.X + x - ( CounterBorderSpace + CounterWidth ) ) / GetCursorCharWide() - .5f );
-            SetCursorPos( x_char, y_line );
+            SetCursorPos( GetLineX( Camera.X + x ), GetLineY( Camera.Y + y ) );
         }
 
         public override void WheelMoved( int x, int y )
@@ -407,8 +408,9 @@ namespace CodeEditor.UI
             //  > Text
             Graphics.Translate( 0, TitleHeight / 4 );
             Graphics.SetFont( TextFont );
-            for ( int i = 0; i < Lines.Count; i++ )
+            for ( int i = Math.Max( 0, GetLineY( Camera.Y + TitleHeight ) ); i < Math.Min( Lines.Count, GetLineY( Camera.Y + Bounds.Height + TitleHeight ) ); i++ )
             {
+                //Console.WriteLine( i );
                 //  > Line
                 int off_x = 0;
                 MatchCollection matches = Regex.Matches( Lines[i], @"\w+|--|\\\W|\W" );
