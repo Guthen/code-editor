@@ -108,6 +108,8 @@ namespace CodeEditor.UI
             {
                 return Timer.GetFPS().ToString() + " FPS";
             } );
+
+            Children.Add( new WindowButton( 3, this, ( WindowButton self ) => ( (DeveloperConsole) self.Parent ).Prompt( "cls" ) ) );
         }
 
         public void OutputHandler( object process, DataReceivedEventArgs outline ) => Append( outline.Data );
