@@ -180,10 +180,17 @@ namespace CodeEditor.UI
 
         public void MoveCursorTowards( int x, int y )
         {
-            //  > Reset X
+            //  > Reset X at top
             if ( y < 0 )
+            {
                 if ( Cursor.Y == 0 )
                     Cursor.X = 0;
+            }
+            //  > Max X at bottom
+            else if ( y > 0 )
+                if ( Cursor.Y == Lines.Count - 1 )
+                    Cursor.X = Lines[Cursor.Y].Length;
+
             //  > Move Y
             if ( !( y == 0 ) )
                 SetCursorPos( Cursor.X, Cursor.Y + y );
@@ -278,7 +285,7 @@ namespace CodeEditor.UI
             return Regex.Replace( Lines[y], @"\p{C}+", " " );
         }
 
-        public int GetCursorX() =>  TextFont.GetWidth( Lines[Cursor.Y].Substring( 0, Cursor.X ) );
+        public int GetCursorX() => TextFont.GetWidth( Lines[Cursor.Y].Substring( 0, Cursor.X ) );
         public int GetCursorCharWide()
         {
             string line = GetSafeLine( Cursor.Y );
@@ -287,6 +294,14 @@ namespace CodeEditor.UI
 
             string cursor_char = line[Cursor.X].ToString();
             return TextFont.GetWidth( cursor_char );
+        }
+
+        public void SwapLine( int y )
+        {
+            string text = Lines[Cursor.Y];
+            Lines.RemoveAt( Cursor.Y );
+            Lines.Insert( Cursor.Y + y, text );
+            SetCursorPos( Cursor.X, Cursor.Y + y );
         }
 
         public void Append( string text )
@@ -353,6 +368,7 @@ namespace CodeEditor.UI
                 //  > Save
                 if ( Keyboard.IsDown( KeyConstant.S ) )
                     Save();
+                //  > Paste
                 else if ( Keyboard.IsDown( KeyConstant.V ) )
                 {
                     string text = Clipboard.GetText();
@@ -361,6 +377,14 @@ namespace CodeEditor.UI
                     if ( !text.Contains( "\n" ) )
                         MoveCursorTowards( text.Length, 0 );
                 }
+            }
+            else if ( Keyboard.IsDown( KeyConstant.LAlt ) )
+            {
+                //  > Swap lines
+                if ( Keyboard.IsDown( KeyConstant.Up ) )
+                    SwapLine( -1 );
+                else if ( Keyboard.IsDown( KeyConstant.Down ) )
+                    SwapLine( 1 );
             }
             //  > Single keys
             else
