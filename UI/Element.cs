@@ -1,6 +1,7 @@
 ﻿using Love;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -53,6 +54,17 @@ namespace CodeEditor.UI
                     return element;
 
             return null;
+        }
+
+        public static List<Element> GetAll<T>()
+        {
+            //var list = new List<T>();
+
+            //foreach ( Element element in elements.Where( ( Element el ) => el is T ) )
+            //    list.Add( (T) Convert.ChangeType( element, typeof( T ) ) );
+
+            //return list;
+            return elements.Where( ( Element el ) => el is T ).ToList();
         }
     }
 

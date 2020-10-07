@@ -1,0 +1,13 @@
+﻿{
+	"Highlighter": {
+		"Syntax": [],
+		"String": [
+			"\""
+		],
+		"Comment": [],
+		"Bool": [
+			"true", 
+			"false"
+		]
+	}
+}

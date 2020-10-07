@@ -11,7 +11,7 @@ namespace CodeEditor.NotUI
         public int WindowWidth = 1080;
         public int WindowHeight = 720;
         public bool WindowFullscreen = false;
-        public Dictionary<string, string> Interpreters = new Dictionary<string, string>();
+        public Dictionary<string, Dictionary<string, string>> Interpreters = new Dictionary<string, Dictionary<string, string>>();
 
         public bool Success = true;
         public string Theme = "default";

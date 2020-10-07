@@ -49,6 +49,37 @@ namespace CodeEditor.UI
                     return string.Format( "Theme: set to '{0}'", args[0] );
                 }
             },
+            {
+                "runkey",
+                ( DeveloperConsole self, List<string> args ) =>
+                {
+                    if ( args.Count == 0 )
+                        return "ERROR: must have at least 1 argument : 'runkey <id> <key?>";
+                    else
+                    {
+                        //  > Get ID
+                        if ( !int.TryParse( args[0], out int id ) ) 
+                            return "ERROR: failed to parse 'id'";
+
+                        //  > Get Text Editor
+                        var text_editor = (TextEditor) Elements.GetAll<TextEditor>().ElementAtOrDefault( id );
+                        if ( !( text_editor == null ) )
+                            return "ERROR: failed to get element";
+
+                        if ( args.Count == 1 )
+                            return string.Format( "RunKey: '{0}'", text_editor.RunKey );
+                        else
+                        {
+                            if ( !text_editor.Language.RunCommands.ContainsKey( args[1] ) )
+                                return "ERROR: this run key doesn't exists";
+
+                            text_editor.RunKey = args[1];
+                        }
+
+                        return "";
+                    }
+                }
+            },
             //{
             //    "cd",
             //    ( DeveloperConsole self, List<string> args ) =>
@@ -71,12 +102,10 @@ namespace CodeEditor.UI
                     if ( !int.TryParse( args[0], out int id ) )
                         return "ERROR: failed to parse 'id'";
 
-                    var text_editors = Elements.elements.Where( ( Element el ) => el is TextEditor ).ToList();
-                    if ( id >= text_editors.Count || id < 0 )
-                        return "ERROR: failed to get element";
-
                     //  > Get Element
-                    var text_editor = (TextEditor) text_editors[id];
+                    var text_editor = (TextEditor) Elements.GetAll<TextEditor>()[id];
+                    if ( !( text_editor == null ) )
+                        return "ERROR: failed to get element";
 
                     //  > Get File Path Argument
                     var file_path = string.Join( " ", args.GetRange( 1, args.Count - 1 ) );
@@ -103,7 +132,8 @@ namespace CodeEditor.UI
 
         public DeveloperConsole()
         {
-            Title = "Developper Console";
+            Title = "Developer Console";
+
             SetRightTitle( () =>
             {
                 return Timer.GetFPS().ToString() + " FPS";

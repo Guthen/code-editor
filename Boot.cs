@@ -7,6 +7,7 @@ using System.IO;
 using Window = CodeEditor.UI.Window;
 using Newtonsoft.Json;
 using CodeEditor.NotUI;
+using System.Linq;
 
 namespace CodeEditor
 {
@@ -53,12 +54,13 @@ namespace CodeEditor
                 Log( string.Format( "Preferences: load '{0}'", Preferences.Path ) );
 
             //  > Coolors: https://coolors.co/090c08-fff7f8-696d7d-ffe74c-ff5964-6369d1-6cae75-8b9474
-            HighlighterParser.Load( "Assets/Highlighters" );
+            Language.Load( "Assets/Languages" );
 
             //  > Elements
             var te_2 = new TextEditor();
             te_2.SetFont( TextFont, TitleFont );
-            te_2.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
+            //te_2.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
+            te_2.SetFile( @"K:\Projets\Lua/Löve2D/Sokoblob/main.lua" );
             te_2.SetFractionPos( 0, 0 );
             te_2.SetFractionSize( .65f, 1 );
             te_2.ComputeBounds();
@@ -83,6 +85,8 @@ namespace CodeEditor
             //te_3.HighlighterTheme = highlighter;
 
             Elements.Focus( DevConsole );
+
+            Console.WriteLine( Elements.GetAll<TextEditor>().ElementAtOrDefault( 1 ) );
 
             //  > Themes
             Theme.Load( "Assets/Themes" );

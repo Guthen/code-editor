@@ -1,0 +1,49 @@
+{
+	"Highlighter": {
+		"Syntax": [
+			"if",
+			"else",
+			"elif",
+			"not",
+			"and",
+			"or",
+			"class",
+			"def",
+			"global",
+			"import",
+			"from",
+			"while",
+			"for",
+			"in",
+			"return",
+			"raise",
+			"continue",
+			"{", "}", "[", "]", ",",
+			"=", "+", "-", "*", "/", "^"
+		],
+		"String": [
+			"\"", 
+			"'"
+		],
+		"Comment": [
+			"#",
+		],
+		"MultilineComment": {
+			"Start": [
+				"\"\"\"",
+			],
+			"End": [
+				"\"\"\""
+			]
+		},
+		"Bool": [
+			"True", 
+			"False",
+					"None"
+		],
+		"WordPattern": "\\w+|\"\"\"|\\\\\\W|\\W"
+	},
+	"RunCommands": {
+		"Python": "%FilePath%"
+	}
+}

@@ -22,7 +22,7 @@ namespace CodeEditor.UI
         public int CounterWidth = 50;
         public int CounterBorderSpace = 10;
 
-        public HighlighterParser HighlighterParser;
+        public Language Language;
 
         public List<string> Lines = new List<string>() { "" };
         public string Text {
@@ -42,6 +42,7 @@ namespace CodeEditor.UI
         }
 
         public string FilePath = "";
+        public string RunKey;
 
         public TextEditor() {
             Bounds = new Rectangle( 0, 0, 450, 300 );
@@ -85,10 +86,13 @@ namespace CodeEditor.UI
 
             //  > Get Highlighter
             var extension = Path.GetExtension( FilePath ).Replace( ".", "" );
-            var highlighter = HighlighterParser.Get( extension );
-            if ( !( highlighter == null ) )
+            var language = Language.Get( extension );
+            if ( !( language == null ) )
             {
-                HighlighterParser = highlighter;
+                Language = language;
+                RunKey = Language.RunCommands.First().Key;
+
+                //  > Add/Remove Run Button
                 if ( Program.Preferences.Interpreters.ContainsKey( extension ) )
                 {
                     if ( !Children.Contains( RunButton ) )
@@ -109,7 +113,7 @@ namespace CodeEditor.UI
                 }
             }
             else
-                HighlighterParser = new HighlighterParser();
+                Language = new Language();
         }
 
         public void Save()
@@ -126,19 +130,32 @@ namespace CodeEditor.UI
 
         public void Run()
         {
-            //Main.Log( string.Format( "Run '{0}'", FilePath ) );
+            //  > Get run command
+            var cmd = Language.RunCommands.ContainsKey( RunKey ) ? Language.RunCommands[RunKey] : null;
+            if ( cmd == null ) return;
+
+            //  > Check Interpreter Preference 
             var extension = Path.GetExtension( FilePath ).Replace( ".", "" );
-            if ( !Program.Preferences.Interpreters.ContainsKey( extension ) ) return;
+            if ( !Program.Preferences.Interpreters.ContainsKey( extension ) || !Program.Preferences.Interpreters[extension].ContainsKey( RunKey ) ) {
+                Boot.Log( string.Format( "ERROR: not configured for '.{0}' ({1})", extension, RunKey ) );
+                return;
+            };
 
-            var interpreter = Program.Preferences.Interpreters[extension];
-            Boot.Log( string.Format( "> '{0}' '{1}'", interpreter, FilePath ) );
+            //  > Replace Variables
+            var run_cmd = cmd.Replace( "%FilePath%", FilePath )
+                             .Replace( "%FolderPath%", Path.GetFullPath( "../", FilePath ) );
 
+            //  > Get Interpreter
+            var interpreter = Program.Preferences.Interpreters[extension][RunKey];
+
+            //  > Start Process
+            Boot.Log( string.Format( "> '{0}' '{1}'", interpreter, run_cmd ) );
             var process = new Process()
             {
                 StartInfo =
                 {
                     FileName = interpreter,
-                    Arguments = FilePath,
+                    Arguments = run_cmd,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
@@ -148,9 +165,16 @@ namespace CodeEditor.UI
 
             process.OutputDataReceived += Boot.DevConsole.OutputHandler;
             process.ErrorDataReceived += Boot.DevConsole.OutputHandler;
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
+            try
+            {
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
+            catch ( Exception e )
+            {
+                Boot.Log( "ERROR: " + e.Message );
+            }
         }
 
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( Lines[Cursor.Y].Length, 0 ) );
@@ -221,13 +245,13 @@ namespace CodeEditor.UI
         Color current_color;
         public Color GetWordColor( string word, bool new_line = false/*, string next_word = ""*/ )
         {
-            if ( HighlighterParser == null || !HighlighterParser.Success )
+            if ( Language == null || !Language.Success )
                 return TextColor;
 
             word = word.Trim();
 
             //  > End of Multi-Line Comment
-            if ( HighlighterParser.MultilineComment.End.Contains( word ) && is_multiline_comment )
+            if ( Language.IsEndMultilineComment( word ) && is_multiline_comment )
             {
                 is_multiline_comment = false;
                 current_color = TextColor;
@@ -244,7 +268,7 @@ namespace CodeEditor.UI
                 return current_color;
 
             //  > String
-            if ( word.Length == 1 && HighlighterParser.String.Contains( word.ToString() ) )
+            if ( word.Length == 1 && Language.IsString( word ) )
                 if ( current_color == Boot.CurrentTheme.Highlighter.String )
                 {
                     current_color = TextColor;
@@ -253,10 +277,10 @@ namespace CodeEditor.UI
                 else
                     current_color = Boot.CurrentTheme.Highlighter.String;
             //  > Comment
-            else if ( HighlighterParser.Comment.Contains( word ) )
+            else if ( Language.IsInlineComment( word ) )
                 current_color = Boot.CurrentTheme.Highlighter.Comment;
             //  > Multi-line Comment
-            else if ( HighlighterParser.MultilineComment.Start.Contains( word ) )
+            else if ( Language.IsStartMultilineComment( word ) )
             {
                 current_color = Boot.CurrentTheme.Highlighter.Comment;
                 is_multiline_comment = true;
@@ -266,12 +290,12 @@ namespace CodeEditor.UI
                 return current_color;
 
             //  > Syntax
-            if ( HighlighterParser.Syntax.Contains( word ) )
+            if ( Language.IsSyntax( word ) )
                 return Boot.CurrentTheme.Highlighter.Syntax;
             //if ( /*next_word == "(" &&*/ HighlighterParser.Function.Contains( word ) )
             //    return Main.CurrentTheme.Highlighter.Function;
             //  > Number and Booleans
-            if ( int.TryParse( word, out _ ) || HighlighterParser.Bool.Contains( word ) )
+            if ( int.TryParse( word, out _ ) || Language.IsBool( word ) )
                 return Boot.CurrentTheme.Highlighter.Number;
 
             return TextColor;
@@ -298,6 +322,8 @@ namespace CodeEditor.UI
 
         public void SwapLine( int y )
         {
+            if ( Cursor.Y + y < 0 || Cursor.Y + y > Lines.Count - 1 ) return;
+
             string text = Lines[Cursor.Y];
             Lines.RemoveAt( Cursor.Y );
             Lines.Insert( Cursor.Y + y, text );
@@ -378,6 +404,7 @@ namespace CodeEditor.UI
                         MoveCursorTowards( text.Length, 0 );
                 }
             }
+            //  > Alt Keys
             else if ( Keyboard.IsDown( KeyConstant.LAlt ) )
             {
                 //  > Swap lines
@@ -459,7 +486,9 @@ namespace CodeEditor.UI
                         }
 
                         break;
+                    //  > Run
                     case KeyConstant.F5:
+                        if ( !Children.Contains( RunButton ) ) return;
                         Save();
                         Run();
                         break;
@@ -484,7 +513,7 @@ namespace CodeEditor.UI
             {
                 //  > Line
                 int off_x = 0;
-                MatchCollection matches = Regex.Matches( Lines[i], HighlighterParser.WordPattern );
+                MatchCollection matches = Regex.Matches( Lines[i], Language.Highlighter.WordPattern );
                 for ( int u = 0; u < matches.Count; u++ )
                 {
                     Match match = matches[u];
