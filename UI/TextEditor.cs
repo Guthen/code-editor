@@ -53,9 +53,9 @@ namespace CodeEditor.UI
 
             ///  > Adding Buttons
             //  > Save
-            Children.Add( new WindowButton( 1, this, ( WindowButton self ) => ( (TextEditor) self.Parent ).Save() ) );
+            Children.Add( new WindowButton( 1, this, ( WindowButton self ) => Save() ) );
             //  > Load
-            Children.Add( new WindowButton( 2, this, ( WindowButton self ) => ( (TextEditor) self.Parent ).Load() ) );
+            Children.Add( new WindowButton( 2, this, ( WindowButton self ) => Load() ) );
             //  > Run
             RunButton = new WindowButton( 4, this, ( WindowButton self ) => Run() );
             RunButton.Visible = false;
