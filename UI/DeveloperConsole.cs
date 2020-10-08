@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Media.Media3D;
 using Love;
 using File = System.IO.File;
 
@@ -63,7 +61,7 @@ namespace CodeEditor.UI
 
                         //  > Get Text Editor
                         var text_editor = (TextEditor) Elements.GetAll<TextEditor>().ElementAtOrDefault( id );
-                        if ( !( text_editor == null ) )
+                        if ( text_editor == null )
                             return "ERROR: failed to get element";
 
                         if ( args.Count == 1 )
@@ -73,10 +71,10 @@ namespace CodeEditor.UI
                             if ( !text_editor.Language.RunCommands.ContainsKey( args[1] ) )
                                 return "ERROR: this run key doesn't exists";
 
+                            var old_run_key = text_editor.RunKey;
                             text_editor.RunKey = args[1];
+                            return string.Format( "RunKey: changed '{0}' to '{1}'", old_run_key, args[1] );
                         }
-
-                        return "";
                     }
                 }
             },
@@ -103,8 +101,8 @@ namespace CodeEditor.UI
                         return "ERROR: failed to parse 'id'";
 
                     //  > Get Element
-                    var text_editor = (TextEditor) Elements.GetAll<TextEditor>()[id];
-                    if ( !( text_editor == null ) )
+                    var text_editor = (TextEditor) Elements.GetAll<TextEditor>().ElementAtOrDefault( id );
+                    if ( text_editor == null )
                         return "ERROR: failed to get element";
 
                     //  > Get File Path Argument
@@ -184,20 +182,45 @@ namespace CodeEditor.UI
         }
 
         public int GetClampedCursorX( int x ) => Math.Clamp( x, 0, Math.Max( PromptCommand.Length, 0 ) );
-        public int GetCursorX() => TextFont.GetWidth( "> " + PromptCommand.Substring( 0, CursorX ) );
+        public int GetCursorX() => TextFont.LFont.GetWidth( "> " + PromptCommand.Substring( 0, CursorX ) );
+        
+        public void MoveCursorTowards( int x )
+        {
+            CursorX = GetClampedCursorX( CursorX + x );
+
+            if ( CursorX == 0 )
+                Camera.X = 0;
+            //  > Cursor Move on X-Axis
+            else
+            {
+                var cursor_x = GetCursorX();
+                var view_width = Bounds.Width - ( Padding.X + Padding.W ) - GetCursorCharWide() * 2;
+                if ( cursor_x < Camera.X )
+                    SetCameraX( cursor_x );
+                else if ( cursor_x > Camera.X + view_width )
+                    SetCameraX( cursor_x - view_width );
+            }
+        }
+
         public int GetCursorCharWide()
         {
             if ( CursorX >= PromptCommand.Length )
-                return TextFont.GetWidth( " " );
+                return TextFont.LFont.GetWidth( " " );
 
             string cursor_char = PromptCommand[CursorX].ToString();
-            return TextFont.GetWidth( cursor_char );
+            return TextFont.LFont.GetWidth( cursor_char );
+        }
+
+        ///  > Camera
+        public void SetCameraX( float cam_x )
+        {
+            Camera.X = Math.Clamp( cam_x, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.LFont.GetWidth( x ), acc ) ) * .75f );
         }
 
         public override void TextInput( string text )
         {
             PromptCommand = PromptCommand.Insert( CursorX, text );
-            CursorX++;
+            MoveCursorTowards( 1 );
         }
 
         public override void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat )
@@ -208,7 +231,7 @@ namespace CodeEditor.UI
                 {
                     string text = Clipboard.GetText();
                     PromptCommand = PromptCommand.Insert( CursorX, text );
-                    CursorX = GetClampedCursorX( CursorX + text.Length );
+                    MoveCursorTowards( text.Length );
                 }
 
                 return;
@@ -220,7 +243,7 @@ namespace CodeEditor.UI
                     if ( CursorX > 0 )
                     {
                         PromptCommand = PromptCommand.Remove( CursorX - 1, 1 );
-                        CursorX--;
+                        MoveCursorTowards( -1 );
                     }
                     break;
                 case KeyConstant.Delete:
@@ -228,16 +251,19 @@ namespace CodeEditor.UI
                         PromptCommand = PromptCommand.Remove( CursorX, 1 );
                     break;
                 case KeyConstant.Left:
-                    CursorX = GetClampedCursorX( CursorX - 1 );
+                    MoveCursorTowards( -1 );
                     break;
                 case KeyConstant.Right:
-                    CursorX = GetClampedCursorX( CursorX + 1 );
+                    MoveCursorTowards( 1 );
                     break;
                 case KeyConstant.Enter:
                     Prompt( PromptCommand );
 
                     PromptCommand = "";
                     CursorX = 0;
+                    break;
+                case KeyConstant.KeypadEnter:
+                    KeyPressed( KeyConstant.Enter, scancode, is_repeat );
                     break;
             }
         }
@@ -246,7 +272,7 @@ namespace CodeEditor.UI
         {
             var speed = -y * 50;
             if ( Keyboard.IsDown( KeyConstant.LShift ) )
-                Camera.X = Math.Clamp( Camera.X + speed, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f );
+                SetCameraX( Camera.X + speed );
             else
                 Camera.Y = Math.Clamp( Camera.Y + speed, 0, LineHeight * Lines.Count * .75f );
         }
@@ -254,7 +280,7 @@ namespace CodeEditor.UI
         public override void InnerRender()
         {
             //  > Lines
-            Graphics.SetFont( TextFont );
+            Graphics.SetFont( TextFont.LFont );
             for ( int i = 0; i < Lines.Count; i++ )
             {
                 Graphics.SetColor( GetLineColor( Lines[i] ) );

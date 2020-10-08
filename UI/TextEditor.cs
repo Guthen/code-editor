@@ -7,9 +7,7 @@ using System.Text.RegularExpressions;
 using File = System.IO.File;
 using System.Windows;
 using Point = Love.Point;
-using Dapplo.Log;
 using System.Diagnostics;
-using CodeEditor.NotUI;
 
 namespace CodeEditor.UI
 {
@@ -49,7 +47,7 @@ namespace CodeEditor.UI
 
             SetRightTitle( () =>
             {
-                return string.Format( "L={0} C={1}", Cursor.Y + 1, Cursor.X + 1 );
+                return string.Format( "L={0} C={1} IDE={2}", Cursor.Y + 1, Cursor.X + 1, RunKey.Length <= 0 ? "NONE" : RunKey );
             } );
 
             ///  > Adding Buttons
@@ -113,7 +111,10 @@ namespace CodeEditor.UI
                 }
             }
             else
-                Language = new Language();
+                Language = new Language()
+                {
+                    Highlighter = new HighlighterParser(),
+                };
         }
 
         public void Save()
@@ -309,15 +310,15 @@ namespace CodeEditor.UI
             return Regex.Replace( Lines[y], @"\p{C}+", " " );
         }
 
-        public int GetCursorX() => TextFont.GetWidth( Lines[Cursor.Y].Substring( 0, Cursor.X ) );
+        public int GetCursorX() => TextFont.LFont.GetWidth( Lines[Cursor.Y].Substring( 0, Cursor.X ) );
         public int GetCursorCharWide()
         {
             string line = GetSafeLine( Cursor.Y );
             if ( Cursor.X >= line.Length )
-                return TextFont.GetWidth( " " );
+                return TextFont.LFont.GetWidth( " " );
 
             string cursor_char = line[Cursor.X].ToString();
-            return TextFont.GetWidth( cursor_char );
+            return TextFont.LFont.GetWidth( cursor_char );
         }
 
         public void SwapLine( int y )
@@ -353,7 +354,7 @@ namespace CodeEditor.UI
         ///  > Camera
         public void SetCameraX( float cam_x )
         {
-            Camera.X = Math.Clamp( cam_x, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f - CounterWidth );
+            Camera.X = Math.Clamp( cam_x, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.LFont.GetWidth( x ), acc ) ) * .75f - CounterWidth );
         }
         public void SetCameraY( float cam_y )
         {
@@ -375,13 +376,22 @@ namespace CodeEditor.UI
         {
             var speed = -y * 50;
 
-            //  > Scroll X
-            if ( Keyboard.IsDown( KeyConstant.LShift ) )
-                SetCameraX( Camera.X + speed );
-            //Camera.X = Math.Clamp( Camera.X + speed, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f - CounterWidth );
-            //  > Scroll Y
+            if ( Keyboard.IsDown( KeyConstant.LCtrl ) )
+            {
+                if ( TextFont.Size + y < 8 || TextFont.Size + y > 35 ) return;
+                TextFont.Derive( TextFont.Size + y );
+                ComputeFontHeight();
+            }
             else
-                Camera.Y = Math.Clamp( Camera.Y + speed, 0, LineHeight * Lines.Count * .95f );
+            {
+                //  > Scroll X
+                if ( Keyboard.IsDown( KeyConstant.LShift ) )
+                    SetCameraX( Camera.X + speed );
+                //Camera.X = Math.Clamp( Camera.X + speed, 0, Lines.Aggregate( 0, ( acc, x ) => Math.Max( TextFont.GetWidth( x ), acc ) ) * .75f - CounterWidth );
+                //  > Scroll Y
+                else
+                    Camera.Y = Math.Clamp( Camera.Y + speed, 0, LineHeight * Lines.Count * .95f );
+            }
         }
 
         public override void KeyPressed( KeyConstant key, Scancode scancode, bool is_repeat )
@@ -506,7 +516,7 @@ namespace CodeEditor.UI
         {
             //  > Text
             Graphics.Translate( 0, TitleHeight / 4 );
-            Graphics.SetFont( TextFont );
+            Graphics.SetFont( TextFont.LFont );
 
             current_color = TextColor;
             for ( int i = Math.Max( 0, GetLineY( Camera.Y + TitleHeight ) ); i < Math.Min( Lines.Count, GetLineY( Camera.Y + Bounds.Height + TitleHeight ) ); i++ )
@@ -521,7 +531,7 @@ namespace CodeEditor.UI
 
                     Graphics.SetColor( GetWordColor( word, u == 0/*, u + 1 < matches.Count ? matches[u + 1].Value : ""*/ ) );
                     Graphics.Print( word, (int) ( CounterWidth + CounterBorderSpace - Camera.X + off_x ), (int) ( LineHeight * i - Camera.Y ) );
-                    off_x += TextFont.GetWidth( word );
+                    off_x += TextFont.LFont.GetWidth( word );
                 }
             }
 

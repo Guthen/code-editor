@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Love;
 using CodeEditor.UI;
-using System.IO;
 using Window = CodeEditor.UI.Window;
-using Newtonsoft.Json;
 using CodeEditor.NotUI;
-using System.Linq;
+using Timer = CodeEditor.NotUI.Timer;
+using Font = CodeEditor.NotUI.Font;
 
 namespace CodeEditor
 {
@@ -43,8 +40,8 @@ namespace CodeEditor
         {
             Keyboard.SetKeyRepeat( true );
 
-            Font TextFont = Graphics.NewFont( "Assets/Fonts/consola.ttf", 15 );
-            Font TitleFont = Graphics.NewFont( "Assets/Fonts/consolab.ttf", 16 );
+            Font TextFont = new Font( "Assets/Fonts/consola.ttf", 15 );
+            Font TitleFont = new Font( "Assets/Fonts/consolab.ttf", 16 );
 
             DevConsole = new DeveloperConsole();
 
@@ -58,7 +55,7 @@ namespace CodeEditor
 
             //  > Elements
             var te_2 = new TextEditor();
-            te_2.SetFont( TextFont, TitleFont );
+            te_2.SetFont( TextFont.Copy(), TitleFont );
             //te_2.SetFile( @"K:\Projets\C#\code-editor\Program.cs" );
             te_2.SetFile( @"K:\Projets\Lua/Löve2D/Sokoblob/main.lua" );
             te_2.SetFractionPos( 0, 0 );
@@ -66,13 +63,13 @@ namespace CodeEditor
             te_2.ComputeBounds();
 
             var te_1 = new TextEditor();
-            te_1.SetFont( TextFont, TitleFont );
+            te_1.SetFont( TextFont.Copy(), TitleFont );
             te_1.SetFile( @"K:\Projets\Python\test.py" );
             te_1.SetFractionPos( te_2.FractionBounds.Width, 0 );
             te_1.SetFractionSize( 1 - te_2.FractionBounds.Width, .65f );
             te_1.ComputeBounds();
 
-            DevConsole.SetFont( TextFont, TitleFont );
+            DevConsole.SetFont( TextFont.Copy(), TitleFont );
             DevConsole.SetFractionPos( te_1.FractionBounds.X, te_1.FractionBounds.Y + te_1.FractionBounds.Height );
             DevConsole.SetFractionSize( te_1.FractionBounds.Width, 1 - te_1.FractionBounds.Height );
             DevConsole.ComputeBounds();
@@ -86,14 +83,16 @@ namespace CodeEditor
 
             Elements.Focus( DevConsole );
 
-            Console.WriteLine( Elements.GetAll<TextEditor>().ElementAtOrDefault( 1 ) );
-
             //  > Themes
             Theme.Load( "Assets/Themes" );
             SetTheme( Theme.Get( Program.Preferences.Theme ) );
         }
 
-        public override void Update( float dt ) => Elements.Call( "Update", dt );
+        public override void Update( float dt )
+        {
+            Elements.Call( "Update", dt );
+            Timer.UpdateAll( dt );
+        }
 
         public override void WheelMoved( int x, int y )
         {

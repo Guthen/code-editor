@@ -1,7 +1,8 @@
-﻿using Love;
+﻿using CodeEditor.NotUI;
+using Love;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Font = CodeEditor.NotUI.Font;
+using Timer = CodeEditor.NotUI.Timer;
 
 namespace CodeEditor.UI
 {
@@ -67,8 +68,8 @@ namespace CodeEditor.UI
         public static Color TitleBackgroundColor = new Color( 99, 105, 209, 255 );
         public static Color DiscretColor = new Color( 163, 163, 163, 255 );
 
-        public Font TextFont = Graphics.GetFont();
-        public Font TitleFont = Graphics.GetFont();
+        public Font TextFont;
+        public Font TitleFont;
 
         public string Title = "Untitled";
         public Func<string> RightTitle = () => { return ""; };
@@ -78,12 +79,17 @@ namespace CodeEditor.UI
             Bounds = new Rectangle( 0, 0, 300, 300 );
             Padding = new Vector4( 4, 4, 4, 4 );
 
-            ComputeFontHeight();
+            //ComputeFontHeight();
 
             Children.Add( new WindowButton( 0, this, ( WindowButton self ) => self.Parent.Destroy() ) );
-
-            ComputeLayout();
         }
+
+        //public void AddButton( WindowButton button )
+        //{
+        //    Children.Add( button );
+
+        //    new Timer( "ComputeLayout_" + ID.ToString(), .01f, () => ComputeLayout() );
+        //}
 
         public override void ComputeLayout()
         {
@@ -97,8 +103,9 @@ namespace CodeEditor.UI
 
         public void ComputeFontHeight()
         {
-            LineHeight = TextFont.GetHeight();
-            TitleHeight = TitleFont.GetHeight();
+            if ( TextFont == null ) return;
+            LineHeight = TextFont.LFont.GetHeight();
+            TitleHeight = TitleFont.LFont.GetHeight();
         }
 
         public void SetFont( Font text, Font title )
@@ -149,14 +156,14 @@ namespace CodeEditor.UI
 
             //  > Title
             inner_y -= TitleHeight;
-            Graphics.SetFont( TitleFont );
+            Graphics.SetFont( TitleFont.LFont );
             Graphics.SetColor( TitleBackgroundColor );
             Graphics.Rectangle( DrawMode.Fill, new RectangleF( inner_x, inner_y, Bounds.Width - Padding.Z * 2, TitleHeight ) );
 
             Graphics.SetColor( TextColor );
             Graphics.Print( Title, inner_x + Padding.X, inner_y + Padding.Y * .5f );
 
-            var limit = 150;
+            var limit = Bounds.Height / 2;
             Graphics.Printf( RightTitle(), inner_x + Padding.X + Bounds.Width - Padding.Z * 2 - Padding.X * 4 - Children.Count * 16 - limit, inner_y + Padding.Y * .5f, limit, AlignMode.Right );
         }
     }

@@ -16,15 +16,15 @@ namespace CodeEditor
     }
 
     class HighlighterParser {
-        public string[] Syntax;
-        public string[] String;
-        public string[] Comment;
+        public string[] Syntax = new string[] { };
+        public string[] String = new string[] { };
+        public string[] Comment = new string[] { };
         public MultilineComment MultilineComment = new MultilineComment()
         {
             Start = new string[] { },
             End = new string[] { },
         };
-        public string[] Bool;
+        public string[] Bool = new string[] { };
         public string WordPattern = @"\w+|\\\W|\W";
     }
 
